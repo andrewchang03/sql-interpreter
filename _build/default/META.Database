@@ -1,0 +1,6 @@
+description = ""
+requires = "ANSITerminal csv unix"
+archive(byte) = "database.cma"
+archive(native) = "database.cmxa"
+plugin(byte) = "database.cma"
+plugin(native) = "database.cmxs"
