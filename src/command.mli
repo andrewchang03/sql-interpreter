@@ -60,8 +60,8 @@
  (** The type [command] represents a player command that is decomposed
      into an action and a phrase. *)
  type command =
-   | CreateDatabase of string (* Use: CREATE DATABASE my_database *)
-   | DropDatabase of string (* Use: DROP DATABASE my_database *)
+   (* | CreateDatabase of string Use: CREATE DATABASE my_database
+   | DropDatabase of string Use: DROP DATABASE my_database *)
    | CreateTable of string (* Use: CREATE TABLE my_table *)
    | DropTable of string (* Use: DROP TABLE my_table *)
    (* Use: ALTER TABLE table_name ADD column_name int|float|bool|char|string; *)
