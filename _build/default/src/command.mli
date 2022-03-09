@@ -1,5 +1,6 @@
 (** Parsing of database commands, modeled after SQL language. *)
 
+(*
  type insert_phrase = {
    table_name: string;
    col_names: string list;
@@ -23,13 +24,15 @@
  type operator = LESS | GREATER | EQ | LE | GE
 
  type condition = {
-   (* value_tup: 'a * 'a; *)
+   left: string;
+   right: string;
    op: operator;
  }
  
  type update_phrase = {
    table_name: string;
-   (* TODO: how should we represent this..? *)
+   col_names: string list;
+   vals: string list;
    cond: condition;
  }
 
@@ -105,3 +108,4 @@
      is "quit" and there is a non-empty object phrase, or if the verb is
      "go" and there is an empty object phrase.*)
  
+     *)
