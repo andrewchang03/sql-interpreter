@@ -1,5 +1,4 @@
 (** Parsing of database commands, modeled after SQL language. *)
-
  type insert_phrase = {
    table_name: string;
    col_names: string list;
