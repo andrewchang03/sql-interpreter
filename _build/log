@@ -1,10 +1,10 @@
 # dune build
 # OCAMLPARAM: unset
 # Workspace root: /Users/Cathryn/Documents/CS3110/Database
-$ /usr/bin/getconf _NPROCESSORS_ONLN > /var/folders/lc/g47xm8896cj4j9dj5mhqj8940000gn/T/dune68e93e.output 2> /dev/null
+$ /usr/bin/getconf _NPROCESSORS_ONLN > /var/folders/lc/g47xm8896cj4j9dj5mhqj8940000gn/T/dunedf663c.output 2> /dev/null
 # Auto-detected concurrency: 8
 # disable binary cache
-$ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g47xm8896cj4j9dj5mhqj8940000gn/T/dune4cd648.output
+$ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g47xm8896cj4j9dj5mhqj8940000gn/T/dunea0b0cc.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -39,6 +39,8 @@ $ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g4
 #            "/Users/Cathryn/Documents/CS3110/Database/_build/install/default/lib"
 #        ; "OCAMLTOP_INCLUDE_PATH" :
 #            "/Users/Cathryn/Documents/CS3110/Database/_build/install/default/lib/toplevel"
+#        ; "OCAML_COLOR" : "always"
+#        ; "OPAMCOLOR" : "always"
 #        }
 #  ; findlib_path = [ External "/Users/Cathryn/.opam/cs3110-2022sp/lib" ]
 #  ; arch_sixtyfour = true
@@ -113,8 +115,14 @@ $ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g4
 #      }
 #  }
 $ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamldep.opt -modules -impl src/command.ml) > _build/default/src/.database.objs/command.ml.d
-> File "src/command.ml", line 66, characters 46-48:
-> 66 |   | "CREATE" :: "TABLE" :: [t] -> CreateTable of t
->                                                    ^^
-> Error: Syntax error
-[2]
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/Cathryn/.opam/cs3110-2022sp/lib/bytes -I /Users/Cathryn/.opam/cs3110-2022sp/lib/csv -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Command.cmo -c -impl src/command.ml)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -a -o src/database.cma src/.database.objs/byte/database.cmo src/.database.objs/byte/database__Command.cmo src/.database.objs/byte/database__Author.cmo)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I src/.database.objs/byte -I src/.database.objs/native -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/Cathryn/.opam/cs3110-2022sp/lib/bytes -I /Users/Cathryn/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/native/database__Command.cmx -c -impl src/command.ml)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -a -o src/database.cmxa src/.database.objs/native/database.cmx src/.database.objs/native/database__Command.cmx src/.database.objs/native/database__Author.cmx)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I terminal/.main.eobjs/byte -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/Cathryn/.opam/cs3110-2022sp/lib/bytes -I /Users/Cathryn/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -no-alias-deps -opaque -o terminal/.main.eobjs/byte/dune__exe__Main.cmo -c -impl terminal/main.ml)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I test/.main.eobjs/byte -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/Cathryn/.opam/cs3110-2022sp/lib/bytes -I /Users/Cathryn/.opam/cs3110-2022sp/lib/csv -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ounit2 -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ounit2/advanced -I /Users/Cathryn/.opam/cs3110-2022sp/lib/seq -I /Users/Cathryn/.opam/cs3110-2022sp/lib/stdlib-shims -I src/.database.objs/byte -no-alias-deps -opaque -o test/.main.eobjs/byte/dune__exe__Main.cmo -c -impl test/main.ml)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I terminal/.main.eobjs/byte -I terminal/.main.eobjs/native -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/Cathryn/.opam/cs3110-2022sp/lib/bytes -I /Users/Cathryn/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -I src/.database.objs/native -intf-suffix .ml -no-alias-deps -opaque -o terminal/.main.eobjs/native/dune__exe__Main.cmx -c -impl terminal/main.ml)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I test/.main.eobjs/byte -I test/.main.eobjs/native -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/Cathryn/.opam/cs3110-2022sp/lib/bytes -I /Users/Cathryn/.opam/cs3110-2022sp/lib/csv -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ounit2 -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ounit2/advanced -I /Users/Cathryn/.opam/cs3110-2022sp/lib/seq -I /Users/Cathryn/.opam/cs3110-2022sp/lib/stdlib-shims -I src/.database.objs/byte -I src/.database.objs/native -intf-suffix .ml -no-alias-deps -opaque -o test/.main.eobjs/native/dune__exe__Main.cmx -c -impl test/main.ml)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -shared -linkall -I src -o src/database.cmxs src/database.cmxa)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -o terminal/main.exe /Users/Cathryn/.opam/cs3110-2022sp/lib/csv/csv.cmxa /Users/Cathryn/.opam/cs3110-2022sp/lib/ocaml/unix.cmxa -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ocaml /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal/ANSITerminal.cmxa -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal src/database.cmxa terminal/.main.eobjs/native/dune__exe__Main.cmx)
+$ (cd _build/default && /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -o test/main.exe /Users/Cathryn/.opam/cs3110-2022sp/lib/csv/csv.cmxa /Users/Cathryn/.opam/cs3110-2022sp/lib/ocaml/unix.cmxa -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ocaml /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal/ANSITerminal.cmxa -I /Users/Cathryn/.opam/cs3110-2022sp/lib/ANSITerminal src/database.cmxa /Users/Cathryn/.opam/cs3110-2022sp/lib/stdlib-shims/stdlib_shims.cmxa /Users/Cathryn/.opam/cs3110-2022sp/lib/ounit2/advanced/oUnitAdvanced.cmxa /Users/Cathryn/.opam/cs3110-2022sp/lib/ounit2/oUnit.cmxa test/.main.eobjs/native/dune__exe__Main.cmx)

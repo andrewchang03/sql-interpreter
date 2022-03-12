@@ -64,13 +64,6 @@ type delete_phrase = {
   cond : condition;
 }
 
-type operator =
-  | LESS
-  | GREATER
-  | EQ
-  | LEQ
-  | GEQ
-
 type command =
   | CreateTable of string
   | DropTable of string
