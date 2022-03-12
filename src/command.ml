@@ -1,9 +1,10 @@
-(* Note: You may introduce new code anywhere in this file. *)
+(** Implementation of database command parser modeled after SQL. *)
 
+(* INSERT INTO table_name (col1, col2, ...) VALUES (val1, val2, ...) *)
 type insert_phrase = {
   table_name : string;
-  col_names : string list;
-  vals : string list;
+  col_names : string list; (* [col1; col2; ...] *)
+  vals : string list; (* [val1; val2; ...] *)
 }
 
 type alter_type =
@@ -27,9 +28,10 @@ type alter_phrase = {
   col_type : data_type;
 }
 
+(* SELECT col1, col2,... FROM table_name *)
 type select_phrase = {
   table_name : string;
-  col_names : string list;
+  col_names : string list; (* [col1; col2; ...] *)
 }
 
 type operator =
@@ -40,23 +42,34 @@ type operator =
   | GE
   | MALFORMED of string
 
+(* left op right *)
 type condition = {
   left : string;
   right : string;
   op : operator;
 }
 
+(* UPDATE table_name SET col1 = val1, col2 = val2, ... WHERE
+   condition *)
 type update_phrase = {
   table_name : string;
-  col_names : string list;
-  vals : string list;
+  col_names : string list; (* [col1; col2; ...] *)
+  vals : string list; (* [val1; val2; ...] *)
   cond : condition;
 }
 
+(* DELETE FROM table_name WHERE condition *)
 type delete_phrase = {
   table_name : string;
   cond : condition;
 }
+
+type operator =
+  | LESS
+  | GREATER
+  | EQ
+  | LEQ
+  | GEQ
 
 type command =
   | CreateTable of string
@@ -69,8 +82,16 @@ type command =
   | Delete of delete_phrase
   | Quit
 
+let create_table = failwith "Unimplemented: create_table"
+let drop_table = failwith "Unimplemented: drop_table"
+let select_op = failwith "Unimplemented: select_op"
+let insert_op = failwith "Unimplemented: insert_op"
+let update_op = failwith "Unimplemented: update_op"
+let delete_op = failwith "Unimplemented: delete_op"
+
 exception Empty
 exception Malformed
+exception NoTable
 
 let parse_alter t_name alter_type column_name column_type : alter_phrase
     =

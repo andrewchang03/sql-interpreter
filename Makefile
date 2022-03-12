@@ -22,3 +22,7 @@ clean:
 
 doc:
 	dune build @doc
+
+linecount:
+	ocamlbuild -clean
+	cloc --by-file --include-lang=OCaml .

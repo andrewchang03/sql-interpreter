@@ -1,6 +1,0 @@
-(** @canonical Database.Author *)
-module Author = Database__Author
-
-
-(** @canonical Database.Command *)
-module Command = Database__Command
