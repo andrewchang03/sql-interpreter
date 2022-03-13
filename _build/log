@@ -1,10 +1,10 @@
 # dune build
 # OCAMLPARAM: unset
 # Workspace root: /Users/jessica/cs3110/database-ocaml/database-ocaml
-$ /usr/bin/getconf _NPROCESSORS_ONLN > /var/folders/9j/v48jm2k51nd8jhpw_nv5glxr0000gn/T/dune3a4ee1.output 2> /dev/null
+$ /usr/bin/getconf _NPROCESSORS_ONLN > /var/folders/9j/v48jm2k51nd8jhpw_nv5glxr0000gn/T/dune8ede20.output 2> /dev/null
 # Auto-detected concurrency: 10
 # disable binary cache
-$ /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/9j/v48jm2k51nd8jhpw_nv5glxr0000gn/T/dunebc1b7a.output
+$ /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/9j/v48jm2k51nd8jhpw_nv5glxr0000gn/T/dune8b39c5.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -116,48 +116,18 @@ $ /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/9j/v4
 $ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamldep.opt -modules -intf src/table.mli) > _build/default/src/.database.objs/table.mli.d
 $ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/jessica/.opam/cs3110-2022sp/lib/bytes -I /Users/jessica/.opam/cs3110-2022sp/lib/csv -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Table.cmi -c -intf src/table.mli)
 $ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/jessica/.opam/cs3110-2022sp/lib/bytes -I /Users/jessica/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Table.cmo -c -impl src/table.ml)
-> File "src/table.ml", line 1:
-> Error: The implementation src/table.ml
->        does not match the interface src/.database.objs/byte/database__Table.cmi:
->        The value `next_rooms' is required but not provided
->        File "src/table.mli", line 48, characters 0-43: Expected declaration
->        The value `next_room' is required but not provided
->        File "src/table.mli", line 42, characters 0-47: Expected declaration
->        The value `exits' is required but not provided
->        File "src/table.mli", line 37, characters 0-38: Expected declaration
->        The value `points' is required but not provided
->        File "src/table.mli", line 33, characters 0-31: Expected declaration
->        The value `description' is required but not provided
->        File "src/table.mli", line 29, characters 0-39: Expected declaration
->        The value `room_ids' is required but not provided
->        File "src/table.mli", line 25, characters 0-31: Expected declaration
->        The value `start_room' is required but not provided
->        File "src/table.mli", line 21, characters 0-28: Expected declaration
->        The exception `UnknownExit' is required but not provided
->        The exception `UnknownRoom' is required but not provided
->        The type `t' is required but not provided
->        File "src/table.mli", line 12, characters 0-6: Expected declaration
-[2]
+$ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -a -o src/database.cma src/.database.objs/byte/database.cmo src/.database.objs/byte/database__Table.cmo src/.database.objs/byte/database__Command.cmo src/.database.objs/byte/database__Author.cmo)
 $ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I src/.database.objs/byte -I src/.database.objs/native -I /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/jessica/.opam/cs3110-2022sp/lib/bytes -I /Users/jessica/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/native/database__Table.cmx -c -impl src/table.ml)
-> File "src/table.ml", line 1:
-> Error: The implementation src/table.ml
->        does not match the interface src/.database.objs/byte/database__Table.cmi:
->        The value `next_rooms' is required but not provided
->        File "src/table.mli", line 48, characters 0-43: Expected declaration
->        The value `next_room' is required but not provided
->        File "src/table.mli", line 42, characters 0-47: Expected declaration
->        The value `exits' is required but not provided
->        File "src/table.mli", line 37, characters 0-38: Expected declaration
->        The value `points' is required but not provided
->        File "src/table.mli", line 33, characters 0-31: Expected declaration
->        The value `description' is required but not provided
->        File "src/table.mli", line 29, characters 0-39: Expected declaration
->        The value `room_ids' is required but not provided
->        File "src/table.mli", line 25, characters 0-31: Expected declaration
->        The value `start_room' is required but not provided
->        File "src/table.mli", line 21, characters 0-28: Expected declaration
->        The exception `UnknownExit' is required but not provided
->        The exception `UnknownRoom' is required but not provided
->        The type `t' is required but not provided
->        File "src/table.mli", line 12, characters 0-6: Expected declaration
+$ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -a -o src/database.cmxa src/.database.objs/native/database.cmx src/.database.objs/native/database__Table.cmx src/.database.objs/native/database__Command.cmx src/.database.objs/native/database__Author.cmx)
+$ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I terminal/.main.eobjs/byte -I /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/jessica/.opam/cs3110-2022sp/lib/bytes -I /Users/jessica/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -no-alias-deps -opaque -o terminal/.main.eobjs/byte/dune__exe__Main.cmo -c -impl terminal/main.ml)
+$ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I test/.main.eobjs/byte -I /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/jessica/.opam/cs3110-2022sp/lib/bytes -I /Users/jessica/.opam/cs3110-2022sp/lib/csv -I /Users/jessica/.opam/cs3110-2022sp/lib/ounit2 -I /Users/jessica/.opam/cs3110-2022sp/lib/ounit2/advanced -I /Users/jessica/.opam/cs3110-2022sp/lib/seq -I /Users/jessica/.opam/cs3110-2022sp/lib/stdlib-shims -I src/.database.objs/byte -no-alias-deps -opaque -o test/.main.eobjs/byte/dune__exe__Main.cmo -c -impl test/main.ml)
+> File "test/main.ml", line 30, characters 4-10:
+> 30 |   [ update students_table [ "" ] [ "" ] (fun x y -> x = y) [] ]
+>          ^^^^^^
+> Error: This function has type
+>          Csv.t -> string list -> string list -> ('a -> 'b -> bool) -> Csv.t
+>        It is applied to too many arguments; maybe you forgot a `;'.
 [2]
+$ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I terminal/.main.eobjs/byte -I terminal/.main.eobjs/native -I /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal -I /Users/jessica/.opam/cs3110-2022sp/lib/bytes -I /Users/jessica/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -I src/.database.objs/native -intf-suffix .ml -no-alias-deps -opaque -o terminal/.main.eobjs/native/dune__exe__Main.cmx -c -impl terminal/main.ml)
+$ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -shared -linkall -I src -o src/database.cmxs src/database.cmxa)
+$ (cd _build/default && /Users/jessica/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -o terminal/main.exe /Users/jessica/.opam/cs3110-2022sp/lib/csv/csv.cmxa /Users/jessica/.opam/cs3110-2022sp/lib/ocaml/unix.cmxa -I /Users/jessica/.opam/cs3110-2022sp/lib/ocaml /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal/ANSITerminal.cmxa -I /Users/jessica/.opam/cs3110-2022sp/lib/ANSITerminal src/database.cmxa terminal/.main.eobjs/native/dune__exe__Main.cmx)
