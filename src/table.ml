@@ -1,6 +1,6 @@
 open Csv
 
-(* TODO: type t = *)
+type t = string list list
 
 let create_table t =
   raise (Stdlib.Failure "Unimplemented: Table.create_table")
