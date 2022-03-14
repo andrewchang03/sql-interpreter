@@ -13,3 +13,5 @@ let update t col vals cond =
 
 let insert t col vals =
   raise (Stdlib.Failure "Unimplemented: Table.insert")
+
+(* let data = load "data/students.csv" *)
