@@ -1,6 +1,6 @@
 (** Implementation of database command parser modeled after SQL. *)
 
-(* INSERT INTO table_name (col1, col2, ...) VALUES (val1, val2, ...) *)
+(* INSERT INTO table_name col1 col2 ... VALUES val1 val2 ... *)
 type insert_phrase = {
   table_name : string;
   col_names : string list; (* [col1; col2; ...] *)
@@ -11,7 +11,7 @@ type alter_type =
   | ADD
   | DROP
   | MODIFY
-  | MALFORMED of string
+  | UNSUPPORTED of string
 
 type data_type =
   | INT
@@ -19,8 +19,9 @@ type data_type =
   | BOOL
   | STRING
   | CHAR
-  | MALFORMED of string
+  | UNSUPPORTED of string
 
+(* ALTER TABLE table_name ADD column_name datatype *)
 type alter_phrase = {
   table_name : string;
   alt_type : alter_type;
@@ -28,7 +29,7 @@ type alter_phrase = {
   col_type : data_type;
 }
 
-(* SELECT col1, col2,... FROM table_name *)
+(* SELECT col1 col2 ... FROM table_name *)
 type select_phrase = {
   table_name : string;
   col_names : string list; (* [col1; col2; ...] *)
@@ -40,7 +41,7 @@ type operator =
   | EQ
   | LE
   | GE
-  | MALFORMED of string
+  | UNSUPPORTED of string
 
 (* left op right *)
 type condition = {
@@ -49,7 +50,7 @@ type condition = {
   op : operator;
 }
 
-(* UPDATE table_name SET col1 = val1, col2 = val2, ... WHERE
+(* UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE
    condition *)
 type update_phrase = {
   table_name : string;
@@ -96,7 +97,7 @@ let parse_alter t_name alter_type column_name column_type : alter_phrase
         | "ADD" -> ADD
         | "DROP" -> DROP
         | "MODIFY" -> MODIFY
-        | _ -> MALFORMED alter_type
+        | _ -> UNSUPPORTED alter_type
       end;
     col_name = column_name;
     col_type =
@@ -107,29 +108,82 @@ let parse_alter t_name alter_type column_name column_type : alter_phrase
         | "bool" -> BOOL
         | "char" -> CHAR
         | "string" -> STRING
-        | _ -> MALFORMED column_type
+        | _ -> UNSUPPORTED column_type
       end;
   }
 
-let parse_select (t : string list) : select_phrase =
-  { table_name = ""; col_names = [] }
+let rec parse_from_table lst =
+  match lst with
+  | [] -> raise Malformed
+  | [ "FROM"; t_name ] -> t_name
+  | _ :: t -> parse_from_table t
 
-let parse_insert (t : string list) : insert_phrase =
-  { table_name = ""; col_names = []; vals = [] }
+let rec index lst elem =
+  match lst with
+  | [] -> -1
+  | h :: t -> if h = elem then 0 else 1 + index t elem
 
-let parse_condition (t : string list) : condition =
-  { left = ""; right = ""; op = LESS }
+let rec get_items_before lst stop_word =
+  if index lst stop_word = -1 then raise Malformed;
+  match lst with
+  | [] -> raise Malformed
+  | h :: s :: _ when s = stop_word -> [ h ]
+  | h :: t -> h :: get_items_before t stop_word
 
-let parse_update (t : string list) : update_phrase =
+let rec get_items_after lst start_word =
+  if index lst start_word = -1 then raise Malformed;
+  match lst with
+  | [] -> raise Malformed
+  | s :: t when s = start_word -> t
+  | _ :: t -> get_items_after t start_word
+
+let rec get_items_between lst start_word stop_word =
+  let index_start = index lst start_word in
+  let index_stop = index lst stop_word in
+  if index_start = -1 || index_stop = -1 || index_start >= index_stop
+  then raise Malformed;
+  match lst with
+  | [] -> raise Malformed
+  | start :: t when start = start_word -> get_items_before t stop_word
+  | _ :: t -> get_items_between t start_word stop_word
+
+let parse_select (lst : string list) : select_phrase =
   {
-    table_name = "";
-    col_names = [];
-    vals = [];
-    cond = parse_condition t;
+    table_name = parse_from_table lst;
+    col_names = get_items_before lst "FROM";
   }
 
-let parse_delete (t : string list) : delete_phrase =
-  { table_name = ""; cond = parse_condition t }
+let parse_insert (t_name : string) (lst : string list) : insert_phrase =
+  let cols = get_items_before lst "VALUES" in
+  let vals = get_items_after lst "VALUES" in
+  if List.length cols <> List.length vals then raise Malformed
+  else { table_name = t_name; col_names = cols; vals }
+
+let parse_condition = function
+  | [ l; o; r ] ->
+      {
+        left = l;
+        right = r;
+        op =
+          (if o = "<" then LESS
+          else if o = ">" then GREATER
+          else if o = "=" then EQ
+          else if o = "<=" then LE
+          else if o = ">=" then GE
+          else UNSUPPORTED o);
+      }
+  | _ -> raise Malformed
+
+let parse_update (t_name : string) (lst : string list) : update_phrase =
+  {
+    table_name = t_name;
+    col_names = get_items_before lst "VALUES";
+    vals = get_items_between lst "VALUES" "WHERE";
+    cond = parse_condition (get_items_after lst "WHERE");
+  }
+
+let parse_delete (t_name : string) (lst : string list) : delete_phrase =
+  { table_name = t_name; cond = parse_condition lst }
 
 let parse str =
   match
@@ -141,11 +195,13 @@ let parse str =
   | [ "DROP"; "TABLE"; t ] -> DropTable t
   | [ "ALTER"; "TABLE"; table_name; alter_type; col_name; col_type ] ->
       AlterTable (parse_alter table_name alter_type col_name col_type)
-  | "SELECT" :: "ALL" :: [ t ] -> SelectAll t
+  | [ "SELECT"; "ALL"; t ] -> SelectAll t
   | "SELECT" :: t -> Select (parse_select t)
-  | "INSERT" :: "INTO" :: t -> InsertInto (parse_insert t)
-  | "UPDATE" :: t -> Update (parse_update t)
-  | "DELETE" :: t -> Delete (parse_delete t)
+  | "INSERT" :: "INTO" :: table_name :: t ->
+      InsertInto (parse_insert table_name t)
+  | "UPDATE" :: table_name :: t -> Update (parse_update table_name t)
+  | "DELETE" :: "FROM" :: table_name :: "WHERE" :: t ->
+      Delete (parse_delete table_name t)
   | [ "quit" ] -> Quit
   | [] -> raise Empty
   | _ -> raise Malformed
