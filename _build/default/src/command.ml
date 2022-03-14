@@ -74,15 +74,17 @@ type command =
   | InsertInto of insert_phrase
   | Update of update_phrase
   | Delete of delete_phrase
+  | LoadTable of string
+  | DisplayTable of string
+  | ListTables
+  | Help
   | Quit
 
-let create_table = failwith "Unimplemented: create_table"
-let drop_table = failwith "Unimplemented: drop_table"
-let select_op = failwith "Unimplemented: select_op"
-let insert_op = failwith "Unimplemented: insert_op"
-let update_op = failwith "Unimplemented: update_op"
-let delete_op = failwith "Unimplemented: delete_op"
-
+(* let create_table = failwith "Unimplemented: create_table" let
+   drop_table = failwith "Unimplemented: drop_table" let select_op =
+   failwith "Unimplemented: select_op" let insert_op = failwith
+   "Unimplemented: insert_op" let update_op = failwith "Unimplemented:
+   update_op" let delete_op = failwith "Unimplemented: delete_op" *)
 exception Empty
 exception Malformed
 exception NoTable
@@ -202,6 +204,10 @@ let parse str =
   | "UPDATE" :: table_name :: t -> Update (parse_update table_name t)
   | "DELETE" :: "FROM" :: table_name :: "WHERE" :: t ->
       Delete (parse_delete table_name t)
+  | [ "load"; table_name ] -> LoadTable table_name
+  | [ "display"; table_name ] -> DisplayTable table_name
+  | [ "list" ] -> ListTables
+  | [ "help" ] -> Help
   | [ "quit" ] -> Quit
   | [] -> raise Empty
   | _ -> raise Malformed

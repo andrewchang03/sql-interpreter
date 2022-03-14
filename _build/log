@@ -1,10 +1,10 @@
-# dune exec test/main.exe
+# dune exec terminal/main.exe
 # OCAMLPARAM: unset
 # Workspace root: /home/andrewcpp/cs3110/project
-$ /usr/bin/nproc > /tmp/duneef3877.output 2> /dev/null
+$ /usr/bin/nproc > /tmp/duneb9d743.output 2> /dev/null
 # Auto-detected concurrency: 8
 # disable binary cache
-$ /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /tmp/dune776d57.output
+$ /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /tmp/dune9f570f.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -116,3 +116,6 @@ $ /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /tmp/dune776d57.o
 #      }
 #  }
 # Workspace root: /home/andrewcpp/cs3110/project
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I terminal/.main.eobjs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -no-alias-deps -opaque -o terminal/.main.eobjs/byte/dune__exe__Main.cmo -c -impl terminal/main.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I terminal/.main.eobjs/byte -I terminal/.main.eobjs/native -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -I src/.database.objs/native -intf-suffix .ml -no-alias-deps -opaque -o terminal/.main.eobjs/native/dune__exe__Main.cmx -c -impl terminal/main.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -o terminal/main.exe /home/andrewcpp/.opam/cs3110-2022sp/lib/csv/csv.cmxa /home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml/unix.cmxa -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal/ANSITerminal.cmxa -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal src/database.cmxa terminal/.main.eobjs/native/dune__exe__Main.cmx)
