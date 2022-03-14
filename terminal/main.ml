@@ -12,6 +12,8 @@ let help =
 
 let rec loop_repl cmd tables =
   match parse cmd with
+  | DropTable name ->
+      ask_command (List.filter (fun x -> fst x <> name) tables)
   | LoadTable name ->
       let data = load ("data/" ^ name ^ ".csv") in
       ask_command (tables @ [ (name, data) ])

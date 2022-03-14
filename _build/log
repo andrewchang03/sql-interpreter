@@ -1,10 +1,10 @@
 # dune exec terminal/main.exe
 # OCAMLPARAM: unset
 # Workspace root: /home/andrewcpp/cs3110/project
-$ /usr/bin/nproc > /tmp/duneb9d743.output 2> /dev/null
+$ /usr/bin/nproc > /tmp/dunecff71e.output 2> /dev/null
 # Auto-detected concurrency: 8
 # disable binary cache
-$ /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /tmp/dune9f570f.output
+$ /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /tmp/duned31e2e.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
