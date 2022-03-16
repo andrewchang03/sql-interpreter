@@ -22,3 +22,13 @@ val update :
 val insert : Csv.t -> string list -> string list -> Csv.t
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table*)
+
+val swap_rows : t -> string list -> string list -> Csv.t
+(** [swap_rows t r1 r2 v] is the table [t] with the first row of values
+    [r1] with the second rows [r2] in the respective columns and returns
+    the new table *)
+
+val swap_cols : t -> string list -> string list -> Csv.t
+(** [swap_cols t r1 r2 v] is the table [t] with the first col of values
+    [c1] with the second cols [c2] in the respective columns and returns
+    the new table *)
