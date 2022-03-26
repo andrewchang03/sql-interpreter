@@ -1,6 +1,7 @@
 open Database
 open Command
 open Csv
+open Queries
 
 let help =
   "SQL queries supported: N/A\n\
@@ -17,6 +18,12 @@ let rec loop_repl cmd tables =
   | LoadTable name ->
       let data = load ("data/" ^ name ^ ".csv") in
       ask_command (tables @ [ (name, data) ])
+  | Select s ->
+      print_readable
+        (select
+           (snd (List.find (fun x -> fst x = s.table_name) tables))
+           s.col_names);
+      ask_command tables
   | DisplayTable name ->
       print_readable (snd (List.find (fun x -> fst x = name) tables));
       ask_command tables
@@ -30,8 +37,6 @@ let rec loop_repl cmd tables =
   | _ ->
       print_string "";
       ask_command tables
-
-(* open_out ("data/" ^ cmd ^ ".csv"); *)
 
 and ask_command tables =
   print_string "\n> ";

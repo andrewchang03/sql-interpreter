@@ -1,0 +1,44 @@
+Symbol,Name,Last Sale,Net Change,% Change,Market Cap,Country,IPO Year,Volume,Sector,Industry
+AAPL,Apple Inc. Common Stock,$159.62,0.03,0.019%,2767386210800.00,United States,1980,49857311,Technology,Computer Manufacturing
+ABBV,AbbVie Inc. Common Stock,$157.95,1.90,1.218%,279374667291.00,United States,2012,4121869,Health Care,Other Pharmaceuticals
+ABT,Abbott Laboratories Common Stock,$120.90,1.42,1.188%,213205006080.00,United States,,1951059,Health Care,Medical/Dental Instruments
+ACN,Accenture plc Class A Ordinary Shares (Ireland),$321.3441,-3.5659,-1.098%,203089707709.00,Ireland,2001,2962683,Technology,EDP Services
+ADBE,Adobe Inc. Common Stock,$441.07,-1.29,-0.292%,208339736040.00,United States,1986,2367285,Technology,Computer Software: Prepackaged Software
+AMZN,Amazon.com Inc. Common Stock,$3138.04,75.96,2.481%,1596774112356.00,United States,1997,2536207,Consumer Services,Catalog/Specialty Distribution
+ASML,ASML Holding N.V. New York Registry Shares,$650.80,0.17,0.026%,262013129740.00,Netherlands,1995,700213,Technology,Industrial Machinery/Components
+AVGO,Broadcom Inc. Common Stock,$600.24,-6.88,-1.133%,245066689481.00,United States,2009,818568,Technology,Semiconductors
+BABA,Alibaba Group Holding Limited American Depositary Shares each representing eight Ordinary share,$100.855,-4.125,-3.929%,271047812500.00,China,2014,69223804,Miscellaneous,Business Services
+BAC,Bank of America Corporation Common Stock,$42.835,0.035,0.082%,369548363065.00,United States,,32249569,Finance,Major Banks
+CMCSA,Comcast Corporation Class A Common Stock,$46.205,-0.025,-0.054%,209457907167.00,United States,,8607052,Consumer Services,Television Services
+COST,Costco Wholesale Corporation Common Stock,$550.11,6.72,1.237%,243822114172.00,United States,,1232741,Consumer Services,Department/Specialty Retail Stores
+CRM,Salesforce.com Inc Common Stock,$208.955,3.385,1.647%,206865450000.00,United States,2004,3019790,Technology,Computer Software: Prepackaged Software
+CSCO,Cisco Systems Inc. Common Stock (DE),$56.10,0.29,0.52%,233048824800.00,United States,1990,9765497,Technology,Computer peripheral equipment
+CVX,Chevron Corporation Common Stock,$160.755,3.045,1.931%,313078938136.00,United States,,10996695,Energy,Integrated oil Companies
+DHR,Danaher Corporation Common Stock,$280.0163,2.0963,0.754%,200310384327.00,United States,,1793855,Health Care,Medical Specialities
+DIS,Walt Disney Company (The) Common Stock,$138.67,0.53,0.384%,252467234687.00,United States,,3970549,Consumer Services,Movies/Entertainment
+FB,Meta Platforms Inc. Class A Common Stock,$205.9101,2.2801,1.12%,560475341178.00,United States,2012,21071170,Technology,Internet and Information Services
+GOOG,Alphabet Inc. Class C Capital Stock,$2682.86,9.05,0.338%,1773293518258.00,United States,2004,734403,Technology,Internet and Information Services
+GOOGL,Alphabet Inc. Class A Common Stock,$2667.88,2.27,0.085%,1763392167869.00,United States,,879274,Technology,Internet and Information Services
+HD,Home Depot Inc. (The) Common Stock,$333.99,3.08,0.931%,348765442726.00,United States,,1561512,Consumer Services,RETAIL: Building Materials
+JNJ,Johnson & Johnson Common Stock,$176.615,2.095,1.20%,464368195725.00,United States,,4097455,Health Care,Biotechnology: Pharmaceutical Preparations
+JPM,JP Morgan Chase & Co. Common Stock,$139.79,1.39,1.004%,412773165916.00,United States,,10600844,Finance,Major Banks
+KO,Coca-Cola Company (The) Common Stock,$60.12,0.66,1.11%,260619894590.00,United States,,9161937,Consumer Non-Durables,Beverages (Production/Distribution)
+LLY,Eli Lilly and Company Common Stock,$283.74,7.30,2.641%,270218973531.00,United States,,2166272,Health Care,Biotechnology: Pharmaceutical Preparations
+MA,Mastercard Incorporated Common Stock,$345.06,0.38,0.11%,337288020041.00,United States,2006,1683609,Miscellaneous,Business Services
+MSFT,Microsoft Corporation Common Stock,$293.28,-1.11,-0.377%,2198680986004.00,United States,1986,18793635,Technology,Computer Software: Prepackaged Software
+NTES,NetEase Inc. American Depositary Shares,$84.49,-8.82,-9.452%,226764629937.00,China,,4008495,Miscellaneous,Business Services
+NVDA,NVIDIA Corporation Common Stock,$244.7613,-0.1987,-0.081%,611903250000.00,United States,1999,35800212,Technology,Semiconductors
+NVO,Novo Nordisk A/S Common Stock,$109.44,3.20,3.012%,249054761889.00,Denmark,,582662,Health Care,Biotechnology: Biological Products (No Diagnostic Substances)
+ORCL,Oracle Corporation Common Stock,$80.07,0.11,0.138%,213639330990.00,United States,1986,5401223,Technology,Computer Software: Prepackaged Software
+PEP,PepsiCo Inc. Common Stock,$160.85,1.15,0.72%,222528157690.00,United States,,1867655,Consumer Non-Durables,Beverages (Production/Distribution)
+PFE,Pfizer Inc. Common Stock,$53.875,0.955,1.805%,302957791125.00,United States,,17921321,Health Care,Biotechnology: Pharmaceutical Preparations
+PG,Procter & Gamble Company (The) Common Stock,$149.89,0.13,0.087%,359296178672.00,United States,,3284454,Consumer Non-Durables,Package Goods/Cosmetics
+TM,Toyota Motor Corporation Common Stock,$171.31,-0.58,-0.337%,236260622954.00,Japan,,193042,Capital Goods,Auto Manufacturing
+TMO,Thermo Fisher Scientific Inc Common Stock,$570.48,7.93,1.41%,223167080950.00,United States,,626795,Capital Goods,Biotechnology: Laboratory Analytical Instruments
+TSLA,Tesla Inc. Common Stock,$872.3455,32.1155,3.822%,901575713672.00,United States,2010,17241214,Capital Goods,Auto Manufacturing
+TSM,Taiwan Semiconductor Manufacturing Company Ltd.,$106.015,0.325,0.308%,549772448226.00,Taiwan,1997,5581494,Technology,Semiconductors
+UNH,UnitedHealth Group Incorporated Common Stock (DE),$505.195,6.935,1.392%,475337544063.00,United States,,1374522,Health Care,Medical Specialities
+V,Visa Inc.,$212.545,0.675,0.319%,445913191146.00,United States,,3494958,Miscellaneous,Business Services
+VZ,Verizon Communications Inc. Common Stock,$52.465,-0.025,-0.048%,220238818427.00,United States,,14838882,Public Utilities,Telecommunications Equipment
+WMT,Walmart Inc. Common Stock,$144.60,-0.75,-0.516%,401102825027.00,United States,,4304227,Consumer Services,Department/Specialty Retail Stores
+XOM,Exxon Mobil Corporation Common Stock,$78.97,2.04,2.652%,334326794118.00,United States,,25790223,Energy,Oil & Gas Production

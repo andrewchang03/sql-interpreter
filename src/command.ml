@@ -80,11 +80,6 @@ type command =
   | Help
   | Quit
 
-(* let create_table = failwith "Unimplemented: create_table" let
-   drop_table = failwith "Unimplemented: drop_table" let select_op =
-   failwith "Unimplemented: select_op" let insert_op = failwith
-   "Unimplemented: insert_op" let update_op = failwith "Unimplemented:
-   update_op" let delete_op = failwith "Unimplemented: delete_op" *)
 exception Empty
 exception Malformed
 exception NoTable

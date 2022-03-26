@@ -8,8 +8,12 @@ open Command
 type t
 (** The abstract type of values representing tables. *)
 
+val select : Csv.t -> string list -> Csv.t
+(** [select table col_names] grab columns in col_names from the table *)
+
 val create_table : string -> unit
-(** [create_table f] is the name of the file that the empty table is created in. *)
+(** [create_table f] is the name of the file that the empty table is
+    created in. *)
 
 val drop_table : Csv.t -> unit
 (** [drop_table t] deletes the table [t]. *)
