@@ -15,11 +15,13 @@ let select table (col_names : string list) =
        (transpose_table table 0))
     0
 
+let select_all tables name =
+  List.find (fun x -> fst x = name) tables |> snd
+
 let create_table fname =
   Csv.save ("data" ^ Filename.dir_sep ^ fname ^ ".csv") []
 
-let drop_table t =
-  raise (Stdlib.Failure "Unimplemented: Table.drop_table")
+let drop_table tables name = List.filter (fun x -> fst x <> name) tables
 
 let update t col vals cond =
   raise (Stdlib.Failure "Unimplemented: Table.update_table")

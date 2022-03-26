@@ -24,8 +24,10 @@ let parse_tests =
     test "parse DROP TABLE" (DropTable "table")
       (parse "DROP TABLE table");
     test "parse SELECT"
-      (Select { table_name = "people"; col_names = [ "city"; "bruh" ] })
-      (parse "SELECT city bruh FROM people");
+      (Select { table_name = "people"; col_names = [ "a"; "b" ] })
+      (parse "SELECT a b FROM people");
+    test "parse SELECT ALL" (SelectAll "table")
+      (parse "SELECT ALL table");
     test_exn "parse SELECT Malformed" Malformed (fun () ->
         parse "SELECT a b FROM");
     test "parse INSERT INTO"

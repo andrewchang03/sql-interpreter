@@ -11,12 +11,15 @@ type t
 val select : Csv.t -> string list -> Csv.t
 (** [select table col_names] grab columns in col_names from the table *)
 
+val select_all : ('a * 'b) list -> 'a -> 'b
+
 val create_table : string -> unit
 (** [create_table f] is the name of the file that the empty table is
     created in. *)
 
-val drop_table : Csv.t -> unit
-(** [drop_table t] deletes the table [t]. *)
+val drop_table : ('a * 'b) list -> 'a -> ('a * 'b) list
+(** [drop_table tables name] deletes the table with [name] from
+    [tables]. *)
 
 val update :
   Csv.t -> string list -> string list -> ('a -> 'b -> bool) -> Csv.t
