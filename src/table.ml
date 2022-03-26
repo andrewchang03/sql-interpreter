@@ -26,8 +26,15 @@ let drop_table tables name = List.filter (fun x -> fst x <> name) tables
 let update t col vals cond =
   raise (Stdlib.Failure "Unimplemented: Table.update_table")
 
-let insert t col vals =
-  raise (Stdlib.Failure "Unimplemented: Table.insert")
+let load_table fname =
+  Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
+
+let insert (fname : string) (cols : string list) (vals : string list) =
+  if List.length cols = List.length vals then
+    Csv.save
+      ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
+      (load_table fname @ [ vals ])
+  else raise (Stdlib.Failure "Columns do not match values")
 
 let swap_rows t =
   raise (Stdlib.Failure "Unimplemented: Table.drop_table")

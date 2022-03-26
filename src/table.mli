@@ -26,7 +26,7 @@ val update :
 (** [update t s v c] is the updated table with the columns [s] updated
     to the values [v] where the condition [c] is true. *)
 
-val insert : Csv.t -> string list -> string list -> Csv.t
+val insert : string -> string list -> string list -> unit
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table*)
 
