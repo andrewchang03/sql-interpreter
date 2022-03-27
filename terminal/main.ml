@@ -31,7 +31,9 @@ let rec loop_repl cmd tables =
           alter_table_modify tables p.table_name p.col_name p.col_type
       | DROP ->
           alter_table_drop tables p.table_name p.col_name p.col_type
-      | UNSUPPORTED s -> print_string ("Syntax error at " ^ s)
+      | UNSUPPORTED s ->
+          print_string ("Syntax error at " ^ s);
+          ask_command tables
     end
   | Help ->
       print_string help;
@@ -53,7 +55,7 @@ let main () =
   ANSITerminal.print_string [ ANSITerminal.blue ] "\nInitializing...\n";
   print_endline "Please enter a command:\n";
   print_string help;
-  ask_command []
+  ignore (ask_command [])
 
 (* Execute the repl. *)
 let () = main ()
