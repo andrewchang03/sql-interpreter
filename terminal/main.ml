@@ -1,5 +1,6 @@
 open Database
 open Command
+open Table
 open Csv
 
 let help =
@@ -23,6 +24,15 @@ let rec loop_repl cmd tables =
   | ListTables ->
       List.iter (fun x -> print_string (fst x ^ "\n")) tables;
       ask_command tables
+  | AlterTable p -> begin
+      match p.alt_type with
+      | ADD -> alter_table_add tables p.table_name p.col_name p.col_type
+      | MODIFY ->
+          alter_table_modify tables p.table_name p.col_name p.col_type
+      | DROP ->
+          alter_table_drop tables p.table_name p.col_name p.col_type
+      | UNSUPPORTED s -> print_string ("Syntax error at " ^ s)
+    end
   | Help ->
       print_string help;
       ask_command tables
