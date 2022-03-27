@@ -65,8 +65,14 @@ type delete_phrase = {
   cond : condition;
 }
 
+(* CREATE TABLE table_name col1 datatype col2 datatype ... *)
+type create_phrase = {
+  table_name : string;
+  cols : (string * data_type) list;
+}
+
 type command =
-  | CreateTable of string
+  | CreateTable of create_phrase
   | DropTable of string
   | AlterTable of alter_phrase
   | Select of select_phrase
@@ -80,11 +86,6 @@ type command =
   | Help
   | Quit
 
-(* let create_table = failwith "Unimplemented: create_table" let
-   drop_table = failwith "Unimplemented: drop_table" let select_op =
-   failwith "Unimplemented: select_op" let insert_op = failwith
-   "Unimplemented: insert_op" let update_op = failwith "Unimplemented:
-   update_op" let delete_op = failwith "Unimplemented: delete_op" *)
 exception Empty
 exception Malformed
 exception NoTable
@@ -187,13 +188,34 @@ let parse_update (t_name : string) (lst : string list) : update_phrase =
 let parse_delete (t_name : string) (lst : string list) : delete_phrase =
   { table_name = t_name; cond = parse_condition lst }
 
+let rec parse_cols (lst : string list) : (string * data_type) list =
+  match lst with
+  | [] -> []
+  | name :: data :: t ->
+      let dt =
+        match data with
+        | "int" -> INT
+        | "float" -> FLOAT
+        | "bool" -> BOOL
+        | "string" -> STRING
+        | "char" -> CHAR
+        | _ -> UNSUPPORTED data
+      in
+      (name, dt) :: parse_cols t
+  | _ -> raise Malformed
+
+let parse_create (t_name : string) (lst : string list) : create_phrase =
+  try { table_name = t_name; cols = parse_cols lst }
+  with Malformed -> raise Malformed
+
 let parse str =
   match
     List.filter
       (fun s -> String.length s > 0)
       (String.split_on_char ' ' str)
   with
-  | [ "CREATE"; "TABLE"; t ] -> CreateTable t
+  | "CREATE" :: "TABLE" :: table_name :: t ->
+      CreateTable (parse_create table_name t)
   | [ "DROP"; "TABLE"; t ] -> DropTable t
   | [ "ALTER"; "TABLE"; table_name; alter_type; col_name; col_type ] ->
       AlterTable (parse_alter table_name alter_type col_name col_type)

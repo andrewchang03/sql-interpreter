@@ -8,12 +8,18 @@ open Command
 type t
 (** The abstract type of values representing tables. *)
 
-val create_table : string -> unit
+val select : Csv.t -> string list -> Csv.t
+(** [select table col_names] grab columns in col_names from the table *)
+
+val select_all : ('a * 'b) list -> 'a -> 'b
+
+val create_table : string -> (string * Command.data_type) list -> Csv.t
 (** [create_table f] is the name of the file that the empty table is
     created in. *)
 
-val drop_table : Csv.t -> unit
-(** [drop_table t] deletes the table [t]. *)
+val drop_table : ('a * 'b) list -> 'a -> ('a * 'b) list
+(** [drop_table tables name] deletes the table with [name] from
+    [tables]. *)
 
 val alter_table_add :
   (string * Csv.t) list -> string -> string -> data_type -> Csv.t
@@ -39,6 +45,16 @@ val update :
 (** [update t s v c] is the updated table with the columns [s] updated
     to the values [v] where the condition [c] is true. *)
 
-val insert : Csv.t -> string list -> string list -> Csv.t
+val insert : string -> string list -> string list -> unit
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table*)
+
+val swap_rows : t -> string list -> string list -> Csv.t
+(** [swap_rows t r1 r2 v] is the table [t] with the first row of values
+    [r1] with the second rows [r2] in the respective columns and returns
+    the new table *)
+
+val swap_cols : t -> string list -> string list -> Csv.t
+(** [swap_cols t r1 r2 v] is the table [t] with the first col of values
+    [c1] with the second cols [c2] in the respective columns and returns
+    the new table *)
