@@ -1,10 +1,10 @@
-# dune exec test/main.exe
+# dune build
 # OCAMLPARAM: unset
-# Workspace root: /Users/Cathryn/Documents/CS3110/Database
-$ /usr/bin/getconf _NPROCESSORS_ONLN > /var/folders/lc/g47xm8896cj4j9dj5mhqj8940000gn/T/dune317d61.output 2> /dev/null
+# Workspace root: /home/andrewcpp/cs3110/project
+$ /usr/bin/nproc > /tmp/dune93bb81.output 2> /dev/null
 # Auto-detected concurrency: 8
 # disable binary cache
-$ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g47xm8896cj4j9dj5mhqj8940000gn/T/dune61dd2a.output
+$ /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /tmp/dune200c9c.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -14,75 +14,76 @@ $ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g4
 #  ; fdo_target_exe = None
 #  ; build_dir = "default"
 #  ; toplevel_path =
-#      Some External "/Users/Cathryn/.opam/cs3110-2022sp/lib/toplevel"
-#  ; ocaml_bin = External "/Users/Cathryn/.opam/cs3110-2022sp/bin"
-#  ; ocaml = Ok External "/Users/Cathryn/.opam/cs3110-2022sp/bin/ocaml"
-#  ; ocamlc = External "/Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt"
+#      Some External "/home/andrewcpp/.opam/cs3110-2022sp/lib/toplevel"
+#  ; ocaml_bin = External "/home/andrewcpp/.opam/cs3110-2022sp/bin"
+#  ; ocaml = Ok External "/home/andrewcpp/.opam/cs3110-2022sp/bin/ocaml"
+#  ; ocamlc = External "/home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt"
 #  ; ocamlopt =
-#      Ok External "/Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlopt.opt"
+#      Ok External "/home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt"
 #  ; ocamldep =
-#      Ok External "/Users/Cathryn/.opam/cs3110-2022sp/bin/ocamldep.opt"
+#      Ok External "/home/andrewcpp/.opam/cs3110-2022sp/bin/ocamldep.opt"
 #  ; ocamlmklib =
-#      Ok External "/Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlmklib.opt"
+#      Ok External "/home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlmklib.opt"
 #  ; env =
 #      map
-#        { "DUNE_OCAML_HARDCODED" : "/Users/Cathryn/.opam/cs3110-2022sp/lib"
-#        ; "DUNE_OCAML_STDLIB" : "/Users/Cathryn/.opam/cs3110-2022sp/lib/ocaml"
-#        ; "DUNE_SOURCEROOT" : "/Users/Cathryn/Documents/CS3110/Database"
-#        ; "INSIDE_DUNE" :
-#            "/Users/Cathryn/Documents/CS3110/Database/_build/default"
-#        ; "MANPATH" :
-#            "/Users/Cathryn/Documents/CS3110/Database/_build/install/default/bin"
+#        { "DUNE_OCAML_HARDCODED" : "/home/andrewcpp/.opam/cs3110-2022sp/lib"
+#        ; "DUNE_OCAML_STDLIB" :
+#            "/home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml"
+#        ; "DUNE_SOURCEROOT" : "/home/andrewcpp/cs3110/project"
+#        ; "INSIDE_DUNE" : "/home/andrewcpp/cs3110/project/_build/default"
 #        ; "OCAMLFIND_IGNORE_DUPS_IN" :
-#            "/Users/Cathryn/Documents/CS3110/Database/_build/install/default/lib"
+#            "/home/andrewcpp/cs3110/project/_build/install/default/lib"
 #        ; "OCAMLPATH" :
-#            "/Users/Cathryn/Documents/CS3110/Database/_build/install/default/lib"
+#            "/home/andrewcpp/cs3110/project/_build/install/default/lib"
 #        ; "OCAMLTOP_INCLUDE_PATH" :
-#            "/Users/Cathryn/Documents/CS3110/Database/_build/install/default/lib/toplevel"
+#            "/home/andrewcpp/cs3110/project/_build/install/default/lib/toplevel"
 #        ; "OCAML_COLOR" : "always"
 #        ; "OPAMCOLOR" : "always"
 #        }
-#  ; findlib_path = [ External "/Users/Cathryn/.opam/cs3110-2022sp/lib" ]
+#  ; findlib_path = [ External "/home/andrewcpp/.opam/cs3110-2022sp/lib" ]
 #  ; arch_sixtyfour = true
 #  ; natdynlink_supported = true
 #  ; supports_shared_libraries = true
 #  ; ocaml_config =
 #      { version = "4.12.0"
 #      ; standard_library_default =
-#          "/Users/Cathryn/.opam/cs3110-2022sp/lib/ocaml"
-#      ; standard_library = "/Users/Cathryn/.opam/cs3110-2022sp/lib/ocaml"
+#          "/home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml"
+#      ; standard_library = "/home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml"
 #      ; standard_runtime = "the_standard_runtime_variable_was_deleted"
 #      ; ccomp_type = "cc"
-#      ; c_compiler = "cc"
-#      ; ocamlc_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
+#      ; c_compiler = "gcc"
+#      ; ocamlc_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-fPIC" ]
 #      ; ocamlc_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
-#      ; ocamlopt_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
+#      ; ocamlopt_cflags =
+#          [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-fPIC" ]
 #      ; ocamlopt_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
 #      ; bytecomp_c_compiler =
-#          [ "cc"
+#          [ "gcc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
+#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
 #          ; "-D_REENTRANT"
 #          ]
-#      ; bytecomp_c_libraries = [ "-lm"; "-lpthread" ]
+#      ; bytecomp_c_libraries = [ "-lm"; "-ldl"; "-lpthread" ]
 #      ; native_c_compiler =
-#          [ "cc"
+#          [ "gcc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
+#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
 #          ; "-D_REENTRANT"
 #          ]
-#      ; native_c_libraries = [ "-lm" ]
+#      ; native_c_libraries = [ "-lm"; "-ldl" ]
 #      ; cc_profile = []
 #      ; architecture = "amd64"
 #      ; model = "default"
 #      ; int_size = 63
 #      ; word_size = 64
-#      ; system = "macosx"
-#      ; asm = [ "clang"; "-arch"; "x86_64"; "-Wno-trigraphs"; "-c" ]
+#      ; system = "linux"
+#      ; asm = [ "as" ]
 #      ; asm_cfi_supported = true
 #      ; with_frame_pointers = false
 #      ; ext_exe = ""
@@ -93,8 +94,8 @@ $ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g4
 #      ; os_type = "Unix"
 #      ; default_executable_name = "a.out"
 #      ; systhread_supported = true
-#      ; host = "x86_64-apple-darwin20.6.0"
-#      ; target = "x86_64-apple-darwin20.6.0"
+#      ; host = "x86_64-pc-linux-gnu"
+#      ; target = "x86_64-pc-linux-gnu"
 #      ; profiling = false
 #      ; flambda = false
 #      ; spacetime = false
@@ -114,4 +115,27 @@ $ /Users/Cathryn/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/lc/g4
 #      ; windows_unicode = false
 #      }
 #  }
-# Workspace root: /Users/Cathryn/Documents/CS3110/Database
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -I src/.database.objs/byte -no-alias-deps -opaque -o src/.database.objs/byte/database.cmo -c -impl src/database.ml-gen)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamldep.opt -modules -intf src/author.mli) > _build/default/src/.database.objs/author.mli.d
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamldep.opt -modules -impl src/author.ml) > _build/default/src/.database.objs/author.ml.d
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamldep.opt -modules -intf src/table.mli) > _build/default/src/.database.objs/table.mli.d
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamldep.opt -modules -impl src/command.ml) > _build/default/src/.database.objs/command.ml.d
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamldep.opt -modules -impl src/table.ml) > _build/default/src/.database.objs/table.ml.d
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -I src/.database.objs/byte -I src/.database.objs/native -intf-suffix .ml-gen -no-alias-deps -opaque -o src/.database.objs/native/database.cmx -c -impl src/database.ml-gen)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Author.cmi -c -intf src/author.mli)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Command.cmo -c -impl src/command.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Author.cmo -c -impl src/author.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Table.cmi -c -intf src/table.mli)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I src/.database.objs/byte -I src/.database.objs/native -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/native/database__Author.cmx -c -impl src/author.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I src/.database.objs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/byte/database__Table.cmo -c -impl src/table.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I src/.database.objs/byte -I src/.database.objs/native -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/native/database__Command.cmx -c -impl src/command.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -a -o src/database.cma src/.database.objs/byte/database.cmo src/.database.objs/byte/database__Command.cmo src/.database.objs/byte/database__Table.cmo src/.database.objs/byte/database__Author.cmo)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I src/.database.objs/byte -I src/.database.objs/native -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -intf-suffix .ml -no-alias-deps -opaque -open Database -o src/.database.objs/native/database__Table.cmx -c -impl src/table.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -a -o src/database.cmxa src/.database.objs/native/database.cmx src/.database.objs/native/database__Command.cmx src/.database.objs/native/database__Table.cmx src/.database.objs/native/database__Author.cmx)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I terminal/.main.eobjs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -no-alias-deps -opaque -o terminal/.main.eobjs/byte/dune__exe__Main.cmo -c -impl terminal/main.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlc.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -bin-annot -I test/.main.eobjs/byte -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ounit2 -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ounit2/advanced -I /home/andrewcpp/.opam/cs3110-2022sp/lib/seq -I /home/andrewcpp/.opam/cs3110-2022sp/lib/stdlib-shims -I src/.database.objs/byte -no-alias-deps -opaque -o test/.main.eobjs/byte/dune__exe__Main.cmo -c -impl test/main.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I terminal/.main.eobjs/byte -I terminal/.main.eobjs/native -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -I src/.database.objs/byte -I src/.database.objs/native -intf-suffix .ml -no-alias-deps -opaque -o terminal/.main.eobjs/native/dune__exe__Main.cmx -c -impl terminal/main.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -I test/.main.eobjs/byte -I test/.main.eobjs/native -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal -I /home/andrewcpp/.opam/cs3110-2022sp/lib/bytes -I /home/andrewcpp/.opam/cs3110-2022sp/lib/csv -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ounit2 -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ounit2/advanced -I /home/andrewcpp/.opam/cs3110-2022sp/lib/seq -I /home/andrewcpp/.opam/cs3110-2022sp/lib/stdlib-shims -I src/.database.objs/byte -I src/.database.objs/native -intf-suffix .ml -no-alias-deps -opaque -o test/.main.eobjs/native/dune__exe__Main.cmx -c -impl test/main.ml)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -shared -linkall -I src -o src/database.cmxs src/database.cmxa)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -o terminal/main.exe /home/andrewcpp/.opam/cs3110-2022sp/lib/csv/csv.cmxa /home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml/unix.cmxa -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal/ANSITerminal.cmxa -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal src/database.cmxa terminal/.main.eobjs/native/dune__exe__Main.cmx)
+$ (cd _build/default && /home/andrewcpp/.opam/cs3110-2022sp/bin/ocamlopt.opt -w +a-4-6-7-9-27-29-30-32..42-44-45-48-50-60-66-67 -warn-error -a+31 -g -o test/main.exe /home/andrewcpp/.opam/cs3110-2022sp/lib/csv/csv.cmxa /home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml/unix.cmxa -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ocaml /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal/ANSITerminal.cmxa -I /home/andrewcpp/.opam/cs3110-2022sp/lib/ANSITerminal src/database.cmxa /home/andrewcpp/.opam/cs3110-2022sp/lib/stdlib-shims/stdlib_shims.cmxa /home/andrewcpp/.opam/cs3110-2022sp/lib/ounit2/advanced/oUnitAdvanced.cmxa /home/andrewcpp/.opam/cs3110-2022sp/lib/ounit2/oUnit.cmxa test/.main.eobjs/native/dune__exe__Main.cmx)
