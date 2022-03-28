@@ -26,6 +26,8 @@ let parse_tests =
     test "parse SELECT"
       (Select { table_name = "people"; col_names = [ "a"; "b" ] })
       (parse "SELECT a b FROM people");
+    (* test "parse SELECT" (Select { table_name = "people"; col_names =
+       [ "a"; "b c" ] }) (parse "SELECT a b c FROM people"); *)
     test "parse SELECT ALL" (SelectAll "table")
       (parse "SELECT ALL table");
     test_exn "parse SELECT Malformed" Malformed (fun () ->
