@@ -1,25 +1,31 @@
 open Command
 
-(** Representation of static table data.
-
-    This module represents the data stored in csv files. It handles
-    loading of that data as well as querying the data. *)
+(** Representation of static table data. This module represents the data
+    stored in csv files. It handles loading of that data as well as
+    querying the data. *)
 
 type t
 (** The abstract type of values representing tables. *)
 
-val create_table : string -> unit
-(** [create_table f] is the name of the file that the empty table is created in. *)
+val select : Csv.t -> string list -> Csv.t
+(** [select table col_names] grab columns in col_names from the table *)
 
-val drop_table : Csv.t -> unit
-(** [drop_table t] deletes the table [t]. *)
+val select_all : ('a * 'b) list -> 'a -> 'b
+
+val create_table : string -> unit
+(** [create_table f] is the name of the file that the empty table is
+    created in. *)
+
+val drop_table : ('a * 'b) list -> 'a -> ('a * 'b) list
+(** [drop_table tables name] deletes the table with [name] from
+    [tables]. *)
 
 val update :
   Csv.t -> string list -> string list -> ('a -> 'b -> bool) -> Csv.t
 (** [update t s v c] is the updated table with the columns [s] updated
     to the values [v] where the condition [c] is true. *)
 
-val insert : Csv.t -> string list -> string list -> Csv.t
+val insert : string -> string list -> string list -> unit
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table*)
 

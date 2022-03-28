@@ -2,16 +2,70 @@ open Csv
 
 type t = string list list
 
-let create_table fname =
-  Csv.save ("data" ^ Filename.dir_sep ^fname^".csv") []
+let rec transpose_table (table : Csv.t) (n : int) : Csv.t =
+  if n = List.length (List.nth table 0) then []
+  else
+    List.map (fun x -> List.nth x n) table
+    :: transpose_table table (n + 1)
 
-let drop_table t =
+let select table (col_names : string list) =
+  transpose_table
+    (List.filter
+       (fun x -> List.mem (List.nth x 0) col_names)
+       (transpose_table table 0))
+    0
+
+let select_all tables name =
+  List.find (fun x -> fst x = name) tables |> snd
+
+let create_table fname =
+  Csv.save ("data" ^ Filename.dir_sep ^ fname ^ ".csv") []
+
+let drop_table tables name = List.filter (fun x -> fst x <> name) tables
+
+let get_first_el lis =
+  match lis with
+  | [] -> []
+  | h :: t -> h
+
+let remove_one_el lis =
+  match lis with
+  | [] -> []
+  | h :: t -> t
+
+let rec update_helper acc col vals cond =
+  match vals with
+  | [] -> acc
+  | h :: t ->
+      if cond h then update_helper (h @ acc) (remove_one_el col) t cond
+      else
+        update_helper
+          (get_first_el col @ acc)
+          (remove_one_el vals) t cond
+
+let rec new_table acc (temp : 'a list) (col : 'a list) t =
+  match t with
+  | [] -> []
+  | h :: t ->
+      if h = col then new_table (acc @ [ temp ]) temp col t
+      else new_table (acc @ [ h ]) temp col t
+
+let update t (col : 'a list) vals cond =
+  let temp = update_helper [] col vals cond in
+  new_table [] temp col t
+
+let load_table fname =
+  Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
+
+let insert (fname : string) (cols : string list) (vals : string list) =
+  if List.length cols = List.length vals then
+    Csv.save
+      ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
+      (load_table fname @ [ vals ])
+  else raise (Stdlib.Failure "Columns do not match values")
+
+let swap_rows t =
   raise (Stdlib.Failure "Unimplemented: Table.drop_table")
 
-let update t col vals cond =
-  raise (Stdlib.Failure "Unimplemented: Table.update_table")
-
-let insert t col vals =
-  raise (Stdlib.Failure "Unimplemented: Table.insert")
-
-
+let swap_cols t =
+  raise (Stdlib.Failure "Unimplemented: Table.drop_table")
