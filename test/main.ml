@@ -16,6 +16,7 @@ let parse_tests =
   [
     test_exn "parse Empty" Empty (fun () -> parse " ");
     test "parse Help" Help (parse "help");
+    test "parse QueriesHelp" QueriesHelp (parse "queries help");
     test "parse Quit" Quit (parse "quit");
     test "parse ListTables" ListTables (parse "list");
     test "parse LoadTable" (LoadTable "table") (parse "load table");
@@ -40,6 +41,23 @@ let parse_tests =
            vals = [ "1"; "2" ];
          })
       (parse "INSERT INTO table a b VALUES 1 2");
+    test "parse UPDATE"
+      (Update
+         {
+           table_name = "table_name";
+           col_names = [ "col1"; "col2" ];
+           vals = [ "val1"; "val2" ];
+           cond = { left = "id"; op = EQ; right = "1" };
+         })
+      (parse "UPDATE table_name col1 col2 VALUES val1 val2 WHERE id = 1");
+    (*test "parse CREATE TABLE"; test "parse ALTER TABLE";*)
+    test "parse DELETE"
+      (Delete
+         {
+           table_name = "table_name";
+           cond = { left = "CustomerName"; op = EQ; right = "Albert" };
+         })
+      (parse "DELETE FROM table_name WHERE CustomerName = Albert");
   ]
 
 (* Table.ml tests *)

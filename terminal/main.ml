@@ -5,12 +5,68 @@ open Csv
 open Table
 
 let help =
-  "SQL queries supported: DROP TABLE, SELECT, SELECT ALL\n\
-   [load table_name] loads the csv file in data directory\n\
-   [display table_name] displays the table already loaded in or created\n\
-   [list] to show list of all tables in the system\n\
-   [help] to show this message again\n\
-   [quit] to quit this program\n"
+  [
+    "SQL queries supported: DROP TABLE, SELECT, SELECT ALL, INSERT INTO";
+    "NOTE: table names must be a single string without spaces, column \
+     names and values must be connected via _ if multiple words.";
+    "[load table_name] loads the csv file in data directory";
+    "[display table_name] displays the table already loaded in or \
+     created";
+    "[list] to show list of all tables in the system";
+    "[queries help] to show format for queries";
+    "[help] to show this message again";
+    "[quit] to quit this program";
+  ]
+
+let queries_help =
+  [
+    "[CREATE TABLE]";
+    "[DROP TABLE table_name] removes table_name";
+    "[SELECT col1 col2 ... FROM table_name] grabs col1 col2 ... from \
+     table_name and returns them";
+    "[SELECT_ALL table_name] returns the entire table";
+    "[INSERT INTO table_name col1 col2 ... VALUES val1 val2 ...] \
+     inserts val1 val2 ... under corresponding col1 col2 ... into \
+     table_name";
+    "[DELETE FROM table_name WHERE condition]";
+    "[UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE\n\
+    \    condition] updates values under col1 and col2 that match \
+     condition with val1 val2 ...";
+    "[ALTER TABLE table_name ADD column_name datatype]";
+  ]
+
+(* merge a string with multiple words into a single string with
+   underscore *)
+let remove_space s =
+  String.concat "_"
+    (List.filter
+       (fun x -> String.length x > 0)
+       (String.split_on_char ' ' s))
+
+(* divide merged string with _ into separate words again *)
+let add_space s =
+  String.concat " "
+    (List.filter
+       (fun x -> String.length x > 0)
+       (String.split_on_char '_' s))
+
+(* remove_space across the whole table, this is necessary because our
+   parser divides on spaces *)
+let remove_table_space table =
+  List.map (fun x -> List.map remove_space x) table
+
+(* add_space across the whole table *)
+let add_table_space table =
+  List.map (fun x -> List.map add_space x) table
+
+(* for updating table within the repl when the file updates, removes
+   table in tables with name = name. *)
+let rec update_table_instance tables name =
+  match tables with
+  | [] -> []
+  | h :: t ->
+      if fst h = name then update_table_instance t name
+      else h :: update_table_instance t name
 
 (* Mutually recursive repl: [loop_repl cmd tables] answers the parser
    and calls the according function, [ask_command tables] prompts the
@@ -20,9 +76,11 @@ let rec loop_repl (tables : (string * Csv.t) list) =
   print_string "\n> ";
   let cmd = read_line () in
   match parse cmd with
-  | DropTable name -> loop_repl (drop_table tables name)
+  | DropTable name ->
+      Sys.remove ("data/" ^ name ^ ".csv");
+      loop_repl (drop_table tables name)
   | LoadTable name ->
-      let data = load ("data/" ^ name ^ ".csv") in
+      let data = remove_table_space (load ("data/" ^ name ^ ".csv")) in
       loop_repl (tables @ [ (name, data) ])
   | CreateTable s -> begin
       try
@@ -34,32 +92,39 @@ let rec loop_repl (tables : (string * Csv.t) list) =
     end
   | Select s ->
       print_readable
-        (select
-           (snd (List.find (fun x -> fst x = s.table_name) tables))
-           s.col_names);
+        (add_table_space
+           (select
+              (snd (List.find (fun x -> fst x = s.table_name) tables))
+              s.col_names));
       loop_repl tables
   | SelectAll s ->
       print_readable (select_all tables s);
       loop_repl tables
+  | InsertInto phrase ->
+      insert phrase.table_name phrase.col_names phrase.vals;
+      let data = load ("data/" ^ phrase.table_name ^ ".csv") in
+      loop_repl
+        (update_table_instance tables phrase.table_name
+        @ [ (phrase.table_name, data) ])
   | DisplayTable name ->
-      print_readable (snd (List.find (fun x -> fst x = name) tables));
+      print_readable
+        (add_table_space
+           (snd (List.find (fun x -> fst x = name) tables)));
       loop_repl tables
   | ListTables ->
       List.iter (fun x -> print_string (fst x ^ "\n")) tables;
       loop_repl tables
-  | AlterTable p -> begin
-      match p.alt_type with
-      | ADD -> alter_table_add tables p.table_name p.col_name p.col_type
-      | MODIFY ->
-          alter_table_modify tables p.table_name p.col_name p.col_type
-      | DROP ->
-          alter_table_drop tables p.table_name p.col_name p.col_type
-      | UNSUPPORTED s ->
-          print_string ("Syntax error at " ^ s);
-          loop_repl tables
-    end
+      (* | AlterTable p -> begin match p.alt_type with | ADD ->
+         alter_table_add tables p.table_name p.col_name p.col_type |
+         MODIFY -> alter_table_modify tables p.table_name p.col_name
+         p.col_type | DROP -> alter_table_drop tables p.table_name
+         p.col_name p.col_type | UNSUPPORTED s -> print_string ("Syntax
+         error at " ^ s); loop_repl tables end*)
+  | QueriesHelp ->
+      print_string (String.concat "\n" queries_help ^ "\n");
+      loop_repl tables
   | Help ->
-      print_string help;
+      print_string (String.concat "\n" help ^ "\n");
       loop_repl tables
   | Quit -> Stdlib.exit 0
   | _ ->
@@ -70,7 +135,7 @@ let rec loop_repl (tables : (string * Csv.t) list) =
 let main () =
   ANSITerminal.print_string [ ANSITerminal.blue ] "\nInitializing...\n";
   print_endline "Please enter a command:\n";
-  print_string help;
+  print_string (String.concat "\n" help ^ "\n");
   ignore (loop_repl [])
 
 (* Execute the repl. *)

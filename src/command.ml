@@ -83,6 +83,7 @@ type command =
   | LoadTable of string
   | DisplayTable of string
   | ListTables
+  | QueriesHelp
   | Help
   | Quit
 
@@ -90,6 +91,7 @@ exception Empty
 exception Malformed
 exception NoTable
 
+(* PARSER FUNCTIONS *)
 let parse_alter t_name alter_type column_name column_type : alter_phrase
     =
   {
@@ -229,6 +231,7 @@ let parse str =
   | [ "load"; table_name ] -> LoadTable table_name
   | [ "display"; table_name ] -> DisplayTable table_name
   | [ "list" ] -> ListTables
+  | [ "queries"; "help" ] -> QueriesHelp
   | [ "help" ] -> Help
   | [ "quit" ] -> Quit
   | [] -> raise Empty

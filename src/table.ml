@@ -3,6 +3,7 @@ open Command
 
 type t = string list list
 
+(* SELECT *)
 let rec transpose_table (table : Csv.t) (n : int) : Csv.t =
   if n = List.length (List.nth table 0) then []
   else
@@ -58,6 +59,7 @@ let alter_table_drop lst t col col_type =
 let alter_table_modify lst t col col_type =
   raise (Stdlib.Failure "Unimplemented: Table.alter_table_modify")
 
+(* INSERT INTO *)
 let insert (fname : string) (cols : string list) (vals : string list) =
   if List.length cols = List.length vals then
     Csv.save
@@ -71,33 +73,18 @@ let swap_rows t =
 let swap_cols t =
   raise (Stdlib.Failure "Unimplemented: Table.drop_table")
 
-let get_first_el lis =
-  match lis with
-  | [] -> []
-  | h :: t -> h
+(* let get_first_el lis = match lis with | [] -> [] | h :: t -> h
 
-let remove_one_el lis =
-  match lis with
-  | [] -> []
-  | h :: t -> t
+   let remove_one_el lis = match lis with | [] -> [] | h :: t -> t
 
-let rec update_helper acc col vals cond =
-  match vals with
-  | [] -> acc
-  | h :: t ->
-      if cond h then update_helper (h @ acc) (remove_one_el col) t cond
-      else
-        update_helper
-          (get_first_el col @ acc)
-          (remove_one_el vals) t cond
+   let rec update_helper acc col vals cond = match vals with | [] -> acc
+   | h :: t -> if cond h then update_helper (h @ acc) (remove_one_el
+   col) t cond else update_helper (get_first_el col @ acc)
+   (remove_one_el vals) t cond
 
-let rec new_table acc (temp : 'a list) (col : 'a list) t =
-  match t with
-  | [] -> []
-  | h :: t ->
-      if h = col then new_table (acc @ [ temp ]) temp col t
-      else new_table (acc @ [ h ]) temp col t
+   let rec new_table acc (temp : 'a list) (col : 'a list) t = match t
+   with | [] -> [] | h :: t -> if h = col then new_table (acc @ [ temp
+   ]) temp col t else new_table (acc @ [ h ]) temp col t
 
-let update t (col : 'a list) vals cond =
-  let temp = update_helper [] col vals cond in
-  new_table [] temp col t
+   let update t (col : 'a list) vals cond = let temp = update_helper []
+   col vals cond in new_table [] temp col t *)
