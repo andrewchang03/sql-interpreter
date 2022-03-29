@@ -70,6 +70,18 @@ let create_test (name : string) (fname : string) cols expected_output :
   name >:: fun _ ->
   assert_equal expected_output (create_table fname cols)
 
+let insert_test
+    (name : string)
+    (fname : string)
+    cols
+    vals
+    expected_output : test =
+  name >:: fun _ ->
+  Csv.print (insert fname cols vals);
+  print_string "\nexpected output\n";
+  Csv.print expected_output;
+  assert_equal expected_output (insert fname cols vals)
+
 (** [update_test name table cols vals cond expected_output] constructs
     an OUnit test named [name] that asserts the quality of
     [expected_output] with [update name table cols vals cond]. *)
@@ -91,18 +103,8 @@ let students_table =
 let students_compare_table =
   Csv.load ("data" ^ Filename.dir_sep ^ "students_compare.csv")
 
-let students_columns = [ "id"; "student_id"; "grad_year" ]
-let student_1 = [ "6"; "456666"; "2025" ]
-let insert_students = students_table @ [ student_1 ]
-
 (* Empty test suite template *)
 let test_suite_1 = []
-
-(* let insert_test (name : string) (fname : string) (cols : string list)
-   (vals : string list) (expected_output : Csv.t) : test = name >:: fun
-   _ -> insert fname cols vals; let table = Csv.load ("data" ^
-   Filename.dir_sep ^ fname ^ ".csv") in assert_equal (Csv.compare
-   expected_output table) 1 *)
 
 (* Table.ml test suite *)
 let table_suite =
@@ -110,8 +112,10 @@ let table_suite =
     create_test "empty" "new" [ ("col1", INT) ] [ [ "col1 int" ] ]
     (* update_test "update students" students_table [ "" ] [ "" ] ( = )
        []; *)
-    (* insert_test "insert into students" "students" students_columns
-       student_1 students_compare_table; *);
+
+    (* TO DELETE? insert_test "new student" "students" [ ("id", INT);
+       ("student_id", STRING); ("grad_year", INT) ] [ "6"; "cat"; "2026"
+       ] students_compare_table; *);
   ]
 
 let suite = "Test suites" >::: List.flatten [ parse_tests; table_suite ]

@@ -59,12 +59,51 @@ let alter_table_drop lst t col col_type =
 let alter_table_modify lst t col col_type =
   raise (Stdlib.Failure "Unimplemented: Table.alter_table_modify")
 
-(* INSERT INTO *)
-let insert (fname : string) (cols : string list) (vals : string list) =
+let rec match_col_vals cols vals =
+  match vals with
+  | [] -> []
+  | h :: val_t -> (
+      match cols with
+      | [] -> []
+      | (name, dt) :: col_t ->
+          (name, dt, h) :: match_col_vals col_t val_t)
+
+let rec check_valid lst =
+  match lst with
+  | [] -> ()
+  | (name, dt, h) :: t -> (
+      match dt with
+      | BOOL ->
+          bool_of_string h;
+          check_valid t
+      | INT ->
+          int_of_string h;
+          check_valid t
+      | FLOAT ->
+          float_of_string h;
+          check_valid t
+      | STRING -> check_valid t
+      | CHAR ->
+          if String.length h = 1 then check_valid t
+          else raise (Stdlib.Failure h)
+      | UNSUPPORTED s -> raise Malformed)
+
+let insert
+    (fname : string)
+    (cols : (string * Command.data_type) list)
+    (vals : string list) =
   if List.length cols = List.length vals then
-    Csv.save
-      ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
-      (load_table fname @ [ vals ])
+    try
+      check_valid (match_col_vals cols vals);
+      let table = load_table fname @ [ vals ] in
+      Csv.save ("data" ^ Filename.dir_sep ^ fname ^ ".csv") table;
+      table
+    with
+    | Invalid_argument s ->
+        raise (Stdlib.Failure "Columns do not match values")
+    | Stdlib.Failure s ->
+        raise (Stdlib.Failure "Columns do not match values")
+    | Malformed -> raise (Stdlib.Failure "Columns do not match values")
   else raise (Stdlib.Failure "Columns do not match values")
 
 let swap_rows t =

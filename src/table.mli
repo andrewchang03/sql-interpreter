@@ -47,7 +47,8 @@ val update :
 (** [update t s v c] is the updated table with the columns [s] updated
     to the values [v] where the condition [c] is true. *)
 
-val insert : string -> string list -> string list -> unit
+val insert :
+  string -> (string * Command.data_type) list -> string list -> Csv.t
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table*)
 
