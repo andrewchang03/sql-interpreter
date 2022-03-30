@@ -1,9 +1,18 @@
 (** Implementation of database command parser modeled after SQL. *)
 
+type data_type =
+  | INT
+  | FLOAT
+  | BOOL
+  | STRING
+  | CHAR
+  | UNSUPPORTED of string
+
 (* INSERT INTO table_name col1 col2 ... VALUES val1 val2 ... *)
 type insert_phrase = {
   table_name : string;
-  col_names : string list; (* [col1; col2; ...] *)
+  cols : (string * data_type) list;
+  (* [(col1, datatype); (col2, dataype); ...] *)
   vals : string list; (* [val1; val2; ...] *)
 }
 
@@ -11,14 +20,6 @@ type alter_type =
   | ADD
   | DROP
   | MODIFY
-  | UNSUPPORTED of string
-
-type data_type =
-  | INT
-  | FLOAT
-  | BOOL
-  | STRING
-  | CHAR
   | UNSUPPORTED of string
 
 (* ALTER TABLE table_name ADD column_name datatype *)
@@ -89,6 +90,7 @@ type command =
 
 exception Empty
 exception Malformed
+exception DuplicateName of string
 exception NoTable
 
 (* PARSER FUNCTIONS *)
@@ -158,11 +160,32 @@ let parse_select (lst : string list) : select_phrase =
     col_names = get_items_before lst "FROM";
   }
 
+(** [parse_cols cols] takes in a list of columns [cols] formatted as [\[
+    colname1 datatype; colname2 datatype; ... \]] and converts them into
+    [\[\ (colname1, datatype); (colname2, datatype), ... ]] *)
+let parse_cols (cols : string list) =
+  List.map
+    (fun col ->
+      match String.split_on_char ' ' col with
+      | [ n; t ] ->
+          let dt =
+            match t with
+            | "int" -> INT
+            | "float" -> FLOAT
+            | "bool" -> BOOL
+            | "char" -> CHAR
+            | "string" -> STRING
+            | _ -> UNSUPPORTED t
+          in
+          (n, dt)
+      | _ -> raise Malformed)
+    cols
+
 let parse_insert (t_name : string) (lst : string list) : insert_phrase =
   let cols = get_items_before lst "VALUES" in
   let vals = get_items_after lst "VALUES" in
   if List.length cols <> List.length vals then raise Malformed
-  else { table_name = t_name; col_names = cols; vals }
+  else { table_name = t_name; cols = parse_cols cols; vals }
 
 let parse_condition = function
   | [ l; o; r ] ->
@@ -190,7 +213,8 @@ let parse_update (t_name : string) (lst : string list) : update_phrase =
 let parse_delete (t_name : string) (lst : string list) : delete_phrase =
   { table_name = t_name; cond = parse_condition lst }
 
-let rec parse_cols (lst : string list) : (string * data_type) list =
+let rec create_parse_cols (lst : string list) :
+    (string * data_type) list =
   match lst with
   | [] -> []
   | name :: data :: t ->
@@ -203,11 +227,11 @@ let rec parse_cols (lst : string list) : (string * data_type) list =
         | "char" -> CHAR
         | _ -> UNSUPPORTED data
       in
-      (name, dt) :: parse_cols t
+      (name, dt) :: create_parse_cols t
   | _ -> raise Malformed
 
 let parse_create (t_name : string) (lst : string list) : create_phrase =
-  try { table_name = t_name; cols = parse_cols lst }
+  try { table_name = t_name; cols = create_parse_cols lst }
   with Malformed -> raise Malformed
 
 let parse str =

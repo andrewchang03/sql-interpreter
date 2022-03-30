@@ -20,7 +20,7 @@ let help =
 
 let queries_help =
   [
-    "[CREATE TABLE]";
+    "[CREATE TABLE table_name col1 datatype col2 datatype ...]";
     "[DROP TABLE table_name] removes table_name";
     "[SELECT col1 col2 ... FROM table_name] grabs col1 col2 ... from \
      table_name and returns them";
@@ -80,7 +80,7 @@ let rec loop_repl (tables : (string * Csv.t) list) =
       Sys.remove ("data/" ^ name ^ ".csv");
       loop_repl (drop_table tables name)
   | LoadTable name ->
-      let data = remove_table_space (load ("data/" ^ name ^ ".csv")) in
+      let data = load ("data/" ^ name ^ ".csv") in
       loop_repl (tables @ [ (name, data) ])
   | CreateTable s -> begin
       try
@@ -101,8 +101,8 @@ let rec loop_repl (tables : (string * Csv.t) list) =
       print_readable (select_all tables s);
       loop_repl tables
   | InsertInto phrase ->
-      insert phrase.table_name phrase.col_names phrase.vals;
-      let data = load ("data/" ^ phrase.table_name ^ ".csv") in
+      let data = insert phrase.table_name phrase.cols phrase.vals in
+      (* let data = load ("data/" ^ phrase.table_name ^ ".csv") in *)
       loop_repl
         (update_table_instance tables phrase.table_name
         @ [ (phrase.table_name, data) ])
@@ -114,12 +114,29 @@ let rec loop_repl (tables : (string * Csv.t) list) =
   | ListTables ->
       List.iter (fun x -> print_string (fst x ^ "\n")) tables;
       loop_repl tables
-      (* | AlterTable p -> begin match p.alt_type with | ADD ->
-         alter_table_add tables p.table_name p.col_name p.col_type |
-         MODIFY -> alter_table_modify tables p.table_name p.col_name
-         p.col_type | DROP -> alter_table_drop tables p.table_name
-         p.col_name p.col_type | UNSUPPORTED s -> print_string ("Syntax
-         error at " ^ s); loop_repl tables end*)
+  | AlterTable p -> (
+      match p.alt_type with
+      | ADD -> (
+          match
+            alter_table_add tables p.table_name p.col_name p.col_type
+          with
+          | exception DuplicateName s ->
+              print_string
+                ("The column name " ^ s
+               ^ " already exists. Please choose another");
+              loop_repl tables
+          | exception NoTable ->
+              print_string "This table does not exist in the database.";
+              loop_repl tables
+          | valid_table_list -> loop_repl valid_table_list)
+      | MODIFY ->
+          alter_table_modify tables p.table_name p.col_name p.col_type
+      | DROP ->
+          loop_repl
+            (alter_table_drop tables p.table_name p.col_name p.col_type)
+      | UNSUPPORTED s ->
+          print_string ("Syntax\n         error at " ^ s);
+          loop_repl tables)
   | QueriesHelp ->
       print_string (String.concat "\n" queries_help ^ "\n");
       loop_repl tables
@@ -127,6 +144,9 @@ let rec loop_repl (tables : (string * Csv.t) list) =
       print_string (String.concat "\n" help ^ "\n");
       loop_repl tables
   | Quit -> Stdlib.exit 0
+  | exception Malformed ->
+      print_string "Syntax error in query.";
+      loop_repl tables
   | _ ->
       print_string "";
       loop_repl tables

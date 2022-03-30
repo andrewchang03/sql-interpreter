@@ -24,19 +24,31 @@ val drop_table : ('a * 'b) list -> 'a -> ('a * 'b) list
     [tables]. *)
 
 val alter_table_add :
-  (string * Csv.t) list -> string -> string -> data_type -> Csv.t
+  (string * Csv.t) list ->
+  string ->
+  string ->
+  data_type ->
+  (string * Csv.t) list
 (** [alter_table_add lst t col col_type] adds a column to table [t] in
     [lst] with name [col] and type [col_type]. *)
 
 val alter_table_drop :
-  (string * Csv.t) list -> string -> string -> data_type -> Csv.t
+  (string * Csv.t) list ->
+  string ->
+  string ->
+  data_type ->
+  (string * Csv.t) list
 (** [alter_table_drop lst t col col_type] drops the column of table [t]
     in [lst] with name [col] and type [col_type]. Requires: [col] must
     exist in the table. Raises: Illegal exception if [col] is not in the
     table. *)
 
 val alter_table_modify :
-  (string * Csv.t) list -> string -> string -> data_type -> Csv.t
+  (string * Csv.t) list ->
+  string ->
+  string ->
+  data_type ->
+  (string * Csv.t) list
 (** [alter_table_modify lst t col col_type] modifies the column of table
     [t] in [lst] with name [col] and type [col_type]. Requires: [col]
     must exist in the table. Raises: Illegal exception if [col] is not
@@ -52,12 +64,12 @@ val insert :
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table*)
 
-val swap_rows : t -> string list -> string list -> Csv.t
+(* val swap_rows : t -> string list -> string list -> Csv.t *)
 (** [swap_rows t r1 r2 v] is the table [t] with the first row of values
     [r1] with the second rows [r2] in the respective columns and returns
     the new table *)
 
-val swap_cols : t -> string list -> string list -> Csv.t
+(* val swap_cols : t -> string list -> string list -> Csv.t *)
 (** [swap_cols t r1 r2 v] is the table [t] with the first col of values
     [c1] with the second cols [c2] in the respective columns and returns
     the new table *)

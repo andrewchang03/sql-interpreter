@@ -20,6 +20,7 @@ let select table (col_names : string list) =
 let select_all tables name =
   List.find (fun x -> fst x = name) tables |> snd
 
+(* CREATE TABLE *)
 let create_table fname (cols : (string * Command.data_type) list) =
   let table =
     [
@@ -42,6 +43,7 @@ let create_table fname (cols : (string * Command.data_type) list) =
   Csv.save ("data" ^ Filename.dir_sep ^ fname ^ ".csv") table;
   table
 
+(* DROP TABLE *)
 let drop_table tables name = List.filter (fun x -> fst x <> name) tables
 
 let update t col vals cond =
@@ -50,13 +52,81 @@ let update t col vals cond =
 let load_table fname =
   Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
 
-let alter_table_add lst t col col_type =
-  raise (Stdlib.Failure "Unimplemented: Table.alter_table_add")
+let rec get_table (tables : (string * Csv.t) list) name =
+  match tables with
+  | [] -> []
+  | (n, d) :: t when n = name -> d
+  | _ :: t -> get_table t name
 
-let alter_table_drop lst t col col_type =
-  raise (Stdlib.Failure "Unimplemented: Table.alter_table_drop")
+(* ALTER TABLE ADD *)
+let rec add_empty_cols (data : string list list) =
+  match data with
+  | [] -> []
+  | row :: tail -> ("" :: row) :: add_empty_cols tail
 
-let alter_table_modify lst t col col_type =
+let is_duplicate_col (t : Csv.t) col =
+  match t with
+  | cols :: t -> List.exists (fun col_name -> col_name = col) cols
+  | [] -> raise NoTable
+
+let alter_table_add_helper (t : Csv.t) col col_type =
+  match t with
+  | cols :: data ->
+      if not (is_duplicate_col t col) then
+        let type_name =
+          match col_type with
+          | INT -> "int"
+          | BOOL -> "bool"
+          | FLOAT -> "float"
+          | STRING -> "string"
+          | CHAR -> "char"
+          | UNSUPPORTED s -> raise Malformed
+        in
+        ((col ^ " " ^ type_name) :: cols) :: add_empty_cols data
+      else raise (DuplicateName col)
+  | [] -> raise NoTable
+
+let rec alter_add_in_place tables name col col_type before =
+  match tables with
+  | [] -> raise NoTable
+  | (n, d) :: t when n = name ->
+      before @ [ (n, alter_table_add_helper d col col_type) ] @ t
+  | h :: t -> alter_add_in_place t name col col_type (before @ [ h ])
+
+let alter_table_add tables name col col_type =
+  alter_add_in_place tables name col col_type []
+
+(* ALTER TABLE DROP *)
+let alter_table_drop_helper (t : Csv.t) col col_type =
+  match t with
+  | cols :: t ->
+      let type_name =
+        match col_type with
+        | INT -> "int"
+        | BOOL -> "bool"
+        | FLOAT -> "float"
+        | STRING -> "string"
+        | CHAR -> "char"
+        | UNSUPPORTED s -> raise Malformed
+      in
+      List.filter (fun c -> c <> col ^ " " ^ type_name) cols :: t
+  | [] -> []
+
+let rec alter_drop_in_place tables name col col_type before =
+  match tables with
+  | [] -> raise NoTable
+  | (n, d) :: t when n = name ->
+      before @ [ (n, alter_table_drop_helper d col col_type) ] @ t
+  | h :: t -> alter_drop_in_place t name col col_type (before @ [ h ])
+
+let alter_table_drop
+    tables
+    (name : string)
+    (col : string)
+    (col_type : data_type) =
+  alter_drop_in_place tables name col col_type []
+
+let alter_table_modify tables name col col_type =
   raise (Stdlib.Failure "Unimplemented: Table.alter_table_modify")
 
 let rec match_col_vals cols vals =
@@ -73,15 +143,18 @@ let rec check_valid lst =
   | [] -> ()
   | (name, dt, h) :: t -> (
       match dt with
-      | BOOL ->
-          bool_of_string h;
-          check_valid t
-      | INT ->
-          int_of_string h;
-          check_valid t
-      | FLOAT ->
-          float_of_string h;
-          check_valid t
+      | BOOL -> (
+          match bool_of_string_opt h with
+          | Some _ -> check_valid t
+          | None -> raise Malformed)
+      | INT -> (
+          match int_of_string_opt h with
+          | Some _ -> check_valid t
+          | None -> raise Malformed)
+      | FLOAT -> (
+          match float_of_string_opt h with
+          | Some _ -> check_valid t
+          | None -> raise Malformed)
       | STRING -> check_valid t
       | CHAR ->
           if String.length h = 1 then check_valid t
@@ -106,11 +179,11 @@ let insert
     | Malformed -> raise (Stdlib.Failure "Columns do not match values")
   else raise (Stdlib.Failure "Columns do not match values")
 
-let swap_rows t =
-  raise (Stdlib.Failure "Unimplemented: Table.drop_table")
+(* let swap_rows t = raise (Stdlib.Failure "Unimplemented:
+   Table.drop_table")
 
-let swap_cols t =
-  raise (Stdlib.Failure "Unimplemented: Table.drop_table")
+   let swap_cols t = raise (Stdlib.Failure "Unimplemented:
+   Table.drop_table") *)
 
 (* let get_first_el lis = match lis with | [] -> [] | h :: t -> h
 

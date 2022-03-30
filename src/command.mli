@@ -30,7 +30,7 @@ type condition = {
 
 type insert_phrase = {
   table_name : string;
-  col_names : string list;
+  cols : (string * data_type) list;
   vals : string list;
 }
 
@@ -83,6 +83,7 @@ type command =
 
 exception Empty
 exception Malformed
+exception DuplicateName of string
 exception NoTable
 
 val parse : string -> command

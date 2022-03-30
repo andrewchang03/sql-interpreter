@@ -37,7 +37,7 @@ let parse_tests =
       (InsertInto
          {
            table_name = "table";
-           col_names = [ "a"; "b" ];
+           cols = [ ("a", INT); ("b", INT) ];
            vals = [ "1"; "2" ];
          })
       (parse "INSERT INTO table a b VALUES 1 2");
