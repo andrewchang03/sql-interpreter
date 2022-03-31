@@ -77,7 +77,9 @@ let rec loop_repl (tables : (string * Csv.t) list) =
   let cmd = read_line () in
   match parse cmd with
   | DropTable name ->
-      Sys.remove ("data/" ^ name ^ ".csv");
+      if List.mem_assoc name tables then
+        Sys.remove ("data/" ^ name ^ ".csv")
+      else ();
       loop_repl (drop_table tables name)
   | LoadTable name ->
       let data = load ("data/" ^ name ^ ".csv") in
@@ -145,7 +147,7 @@ let rec loop_repl (tables : (string * Csv.t) list) =
       loop_repl tables
   | Quit -> Stdlib.exit 0
   | exception Malformed ->
-      print_string "Syntax error in query.";
+      print_string "Malformed command. Please try again.\n";
       loop_repl tables
   | _ ->
       print_string "";

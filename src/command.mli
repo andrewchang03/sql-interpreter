@@ -26,7 +26,7 @@ type condition = {
   op : operator;
 }
 
-(* QUERIES PHRASES *)
+(** QUERIES PHRASES *)
 
 type insert_phrase = {
   table_name : string;
