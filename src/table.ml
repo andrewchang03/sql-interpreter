@@ -46,8 +46,45 @@ let create_table fname (cols : (string * Command.data_type) list) =
 (* DROP TABLE *)
 let drop_table tables name = List.filter (fun x -> fst x <> name) tables
 
-let update t col vals cond =
-  raise (Stdlib.Failure "Unimplemented: Table.update_table")
+(* UPDATE TABLE *)
+
+let get_first_el (lis : string list) : string =
+  match lis with
+  | [] -> ""
+  | h :: t -> h
+
+let remove_one_el lis =
+  match lis with
+  | [] -> []
+  | h :: t -> t
+
+let rec update_helper acc (col : string list) (vals : 'a list) cond =
+  match vals with
+  | [] -> acc
+  | h :: t ->
+      if cond h then update_helper (h :: acc) (remove_one_el col) t cond
+      else
+        update_helper
+          (get_first_el col :: acc)
+          (remove_one_el vals) t cond
+
+let rec new_table acc (temp : 'a list) (col : 'a list) t =
+  match t with
+  | [] -> []
+  | h :: t ->
+      if h = col then new_table (acc @ [ temp ]) temp col t
+      else new_table (acc @ [ h ]) temp col t
+
+let update
+    (t : Csv.t)
+    (col : string list)
+    (vals : 'a list)
+    (cond : 'a -> bool) =
+  let temp = update_helper [] col vals cond in
+  new_table [] temp col t
+
+let update t cols vals cond =
+  raise (Stdlib.Failure "Unimplemented: update")
 
 let load_table fname =
   Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
@@ -69,10 +106,47 @@ let is_duplicate_col (t : Csv.t) col =
   | cols :: t -> List.exists (fun col_name -> col_name = col) cols
   | [] -> raise NoTable
 
-let alter_table_add_helper (t : Csv.t) col col_type =
-  match t with
-  | cols :: data ->
-      if not (is_duplicate_col t col) then
+let alter_table_add_helper (t : Csv.t) name col col_type =
+  let result =
+    match t with
+    | cols :: data ->
+        if not (is_duplicate_col t col) then
+          let type_name =
+            match col_type with
+            | INT -> "int"
+            | BOOL -> "bool"
+            | FLOAT -> "float"
+            | STRING -> "string"
+            | CHAR -> "char"
+            | UNSUPPORTED s -> raise Malformed
+          in
+          ((col ^ " " ^ type_name) :: cols) :: add_empty_cols data
+        else raise (DuplicateName col)
+    | [] -> raise NoTable
+  in
+  Csv.save ("data" ^ Filename.dir_sep ^ name ^ ".csv") result;
+  result
+
+let rec alter_add_in_place tables name col col_type before =
+  match tables with
+  | [] -> raise NoTable
+  | (n, d) :: t when n = name ->
+      before @ [ (n, alter_table_add_helper d name col col_type) ] @ t
+  | h :: t -> alter_add_in_place t name col col_type (before @ [ h ])
+
+let alter_table_add tables name col col_type =
+  alter_add_in_place tables name col col_type []
+
+(* ALTER TABLE DROP *)
+let rec drop_cols (data : string list list) =
+  match data with
+  | [] -> []
+  | row :: tail -> ("" :: row) :: drop_cols tail
+
+let alter_table_drop_helper (t : Csv.t) name col col_type =
+  let result =
+    match t with
+    | cols :: t ->
         let type_name =
           match col_type with
           | INT -> "int"
@@ -82,41 +156,18 @@ let alter_table_add_helper (t : Csv.t) col col_type =
           | CHAR -> "char"
           | UNSUPPORTED s -> raise Malformed
         in
-        ((col ^ " " ^ type_name) :: cols) :: add_empty_cols data
-      else raise (DuplicateName col)
-  | [] -> raise NoTable
-
-let rec alter_add_in_place tables name col col_type before =
-  match tables with
-  | [] -> raise NoTable
-  | (n, d) :: t when n = name ->
-      before @ [ (n, alter_table_add_helper d col col_type) ] @ t
-  | h :: t -> alter_add_in_place t name col col_type (before @ [ h ])
-
-let alter_table_add tables name col col_type =
-  alter_add_in_place tables name col col_type []
-
-(* ALTER TABLE DROP *)
-let alter_table_drop_helper (t : Csv.t) col col_type =
-  match t with
-  | cols :: t ->
-      let type_name =
-        match col_type with
-        | INT -> "int"
-        | BOOL -> "bool"
-        | FLOAT -> "float"
-        | STRING -> "string"
-        | CHAR -> "char"
-        | UNSUPPORTED s -> raise Malformed
-      in
-      List.filter (fun c -> c <> col ^ " " ^ type_name) cols :: t
-  | [] -> []
+        List.filter (fun c -> c <> col ^ " " ^ type_name) cols
+        :: drop_cols t
+    | [] -> []
+  in
+  Csv.save ("data" ^ Filename.dir_sep ^ name ^ ".csv") result;
+  result
 
 let rec alter_drop_in_place tables name col col_type before =
   match tables with
   | [] -> raise NoTable
   | (n, d) :: t when n = name ->
-      before @ [ (n, alter_table_drop_helper d col col_type) ] @ t
+      before @ [ (n, alter_table_drop_helper d name col col_type) ] @ t
   | h :: t -> alter_drop_in_place t name col col_type (before @ [ h ])
 
 let alter_table_drop
@@ -173,7 +224,7 @@ let insert
       table
     with
     | Invalid_argument s ->
-        raise (Stdlib.Failure "Columns do not match values")
+        raise (Stdlib.Failure "Columns do\n       not match values")
     | Stdlib.Failure s ->
         raise (Stdlib.Failure "Columns do not match values")
     | Malformed -> raise (Stdlib.Failure "Columns do not match values")

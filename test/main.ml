@@ -90,7 +90,7 @@ let update_test
     (table : Csv.t)
     (cols : string list)
     (vals : string list)
-    (cond : 'a -> 'b -> bool)
+    (cond : 'a -> bool)
     (expected_output : Csv.t) : test =
   name >:: fun _ ->
   assert_equal expected_output (update table cols vals cond)

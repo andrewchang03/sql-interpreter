@@ -55,7 +55,7 @@ val alter_table_modify :
     in the table. *)
 
 val update :
-  Csv.t -> string list -> string list -> ('a -> 'b -> bool) -> Csv.t
+  Csv.t -> string list -> string list -> ('a -> bool) -> Csv.t
 (** [update t s v c] is the updated table with the columns [s] updated
     to the values [v] where the condition [c] is true. *)
 
