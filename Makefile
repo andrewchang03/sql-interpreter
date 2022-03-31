@@ -20,7 +20,7 @@ clean:
 	dune clean
 	rm -f database.zip
 
-doc:
+docs:
 	dune build @doc
 
 linecount:
