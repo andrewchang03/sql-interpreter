@@ -197,20 +197,20 @@ let rec check_valid lst =
       | BOOL -> (
           match bool_of_string_opt h with
           | Some _ -> check_valid t
-          | None -> raise Malformed)
+          | None -> invalid_arg "not a bool")
       | INT -> (
           match int_of_string_opt h with
           | Some _ -> check_valid t
-          | None -> raise Malformed)
+          | None -> invalid_arg "not an int")
       | FLOAT -> (
           match float_of_string_opt h with
           | Some _ -> check_valid t
-          | None -> raise Malformed)
+          | None -> invalid_arg "not a float")
       | STRING -> check_valid t
       | CHAR ->
           if String.length h = 1 then check_valid t
-          else raise (Stdlib.Failure h)
-      | UNSUPPORTED s -> raise Malformed)
+          else invalid_arg "not a char"
+      | UNSUPPORTED s -> invalid_arg "unsupported")
 
 let insert
     (fname : string)
@@ -224,7 +224,7 @@ let insert
       table
     with
     | Invalid_argument s ->
-        raise (Stdlib.Failure "Columns do\n       not match values")
+        raise (Stdlib.Failure "Columns do not match values")
     | Stdlib.Failure s ->
         raise (Stdlib.Failure "Columns do not match values")
     | Malformed -> raise (Stdlib.Failure "Columns do not match values")

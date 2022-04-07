@@ -40,7 +40,7 @@ let parse_tests =
            cols = [ ("a", INT); ("b", INT) ];
            vals = [ "1"; "2" ];
          })
-      (parse "INSERT INTO table a b VALUES 1 2");
+      (parse "INSERT INTO table a_int b_int VALUES 1 2");
     test "parse UPDATE"
       (Update
          {
