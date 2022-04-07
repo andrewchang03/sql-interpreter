@@ -102,12 +102,17 @@ let rec loop_repl (tables : (string * Csv.t) list) =
   | SelectAll s ->
       print_readable (select_all tables s);
       loop_repl tables
-  | InsertInto phrase ->
-      let data = insert phrase.table_name phrase.cols phrase.vals in
-      (* let data = load ("data/" ^ phrase.table_name ^ ".csv") in *)
-      loop_repl
-        (update_table_instance tables phrase.table_name
-        @ [ (phrase.table_name, data) ])
+  | InsertInto phrase -> begin
+      try
+        let data = insert phrase.table_name phrase.cols phrase.vals in
+        (* let data = load ("data/" ^ phrase.table_name ^ ".csv") in *)
+        loop_repl
+          (update_table_instance tables phrase.table_name
+          @ [ (phrase.table_name, data) ])
+      with Stdlib.Failure f ->
+        print_string "Incorrect data type.";
+        loop_repl tables
+    end
   | DisplayTable name ->
       print_readable
         (add_table_space
