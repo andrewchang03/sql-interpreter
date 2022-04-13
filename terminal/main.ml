@@ -25,9 +25,9 @@ let queries_help =
     "[SELECT col1 col2 ... FROM table_name] grabs col1 col2 ... from \
      table_name and returns them";
     "[SELECT_ALL table_name] returns the entire table";
-    "[INSERT INTO table_name col1 col2 ... VALUES val1 val2 ...] \
-     inserts val1 val2 ... under corresponding col1 col2 ... into \
-     table_name";
+    "[INSERT INTO table_name col1_type col2_type ... VALUES val1 val2 \
+     ...] inserts val1 val2 ... under corresponding col1 col2 ... \
+     where type represents the col type into table_name";
     "[DELETE FROM table_name WHERE condition]";
     "[UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE\n\
     \    condition] updates values under col1 and col2 that match \
