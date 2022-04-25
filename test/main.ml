@@ -70,38 +70,25 @@ let create_test (name : string) (fname : string) cols expected_output :
   name >:: fun _ ->
   assert_equal expected_output (create_table fname cols)
 
-let insert_test
-    (name : string)
-    (fname : string)
-    cols
-    vals
-    expected_output : test =
-  name >:: fun _ ->
-  Csv.print (insert fname cols vals);
-  print_string "\nexpected output\n";
-  Csv.print expected_output;
-  assert_equal expected_output (insert fname cols vals)
+let insert_cols =
+  [ ("id", INT); ("student_name", STRING); ("grad_year", INT) ]
 
-(** [update_test name table cols vals cond expected_output] constructs
-    an OUnit test named [name] that asserts the quality of
-    [expected_output] with [update name table cols vals cond]. *)
-let update_test
-    (name : string)
-    (table : Csv.t)
-    (cols : string list)
-    (vals : string list)
-    (cond : 'a -> bool)
-    (expected_output : Csv.t) : test =
+let insert_first = [ "0"; "dog"; "2025" ]
+
+let insert_test (name : string) cols vals expected_output : test =
   name >:: fun _ ->
-  assert_equal expected_output (update table cols vals cond)
+  let file = create_table "insert_test" insert_cols in
+  let inserted = insert "insert_test" cols vals in
+  assert_equal expected_output inserted;
+  Sys.remove ("data" ^ Filename.dir_sep ^ "insert_test.csv")
 
 let data_dir_prefix = "data" ^ Filename.dir_sep
 
 let students_table =
   Csv.load ("data" ^ Filename.dir_sep ^ "students.csv")
 
-let students_compare_table =
-  Csv.load ("data" ^ Filename.dir_sep ^ "students_compare.csv")
+let insert_compare =
+  Csv.load ("data" ^ Filename.dir_sep ^ "insert_compare.csv")
 
 (* Empty test suite template *)
 let test_suite_1 = []
@@ -109,13 +96,9 @@ let test_suite_1 = []
 (* Table.ml test suite *)
 let table_suite =
   [
-    create_test "empty" "new" [ ("col1", INT) ] [ [ "col1 int" ] ]
-    (* update_test "update students" students_table [ "" ] [ "" ] ( = )
-       []; *)
-
-    (* TO DELETE? insert_test "new student" "students" [ ("id", INT);
-       ("student_id", STRING); ("grad_year", INT) ] [ "6"; "cat"; "2026"
-       ] students_compare_table; *);
+    create_test "empty" "new" [ ("col1", INT) ] [ [ "col1 int" ] ];
+    insert_test "insert into table" insert_cols insert_first
+      insert_compare;
   ]
 
 let suite = "Test suites" >::: List.flatten [ parse_tests; table_suite ]

@@ -1,0 +1,2 @@
+id int,student_name string,grad_year int
+0,dog,2025
