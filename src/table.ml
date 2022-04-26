@@ -93,16 +93,6 @@ let swap_rows t =
 let swap_cols t =
   raise (Stdlib.Failure "Unimplemented: Table.drop_table")
 
-let rec update_helper acc col vals cond =
-  match vals with
-  | [] -> acc
-  | h :: t ->
-      if cond h then update_helper (h @ acc) (remove_one_el col) t cond
-      else
-        update_helper
-          (get_first_el col @ acc)
-          (remove_one_el vals) t cond
-
 let rec new_table acc (temp : 'a list) (col : 'a list) t =
   match t with
   | [] -> []
@@ -110,9 +100,36 @@ let rec new_table acc (temp : 'a list) (col : 'a list) t =
       if h = col then new_table (acc @ [ temp ]) temp col t
       else new_table (acc @ [ h ]) temp col t
 
-let update t (col : 'a list) vals cond =
-  let temp = update_helper [] col vals cond in
-  new_table [] temp col t
+let rec get_row tab num count =
+  match tab with
+  | [] -> []
+  | h :: t -> if num = count then h else get_row t num (count + 1)
+
+
+let rec is_in item col =
+    (**START*)
+  match col with
+  | [] -> None
+  | h :: t -> if h = item then Some item else is_in item t
+
+let check col ind acc =
+  for each=0 to (length col)
+    let temp = is_in each ind in
+    if temp <> None then
+      match temp with
+      | None -> item :: acc
+      | Some v -> v :: acc
+
+let rec help2 header col acc count =
+  match col with
+  | [] -> acc
+  | h :: t -> if (is_in h col) <> None then help2 header col (h::acc) (count+1)
+  else help2 header col (acc) (count+1)
+let update t cols vals cond =
+  acc = []
+indicies = help2 (get_row t 0 0) col [] 0
+for x = 0 to (length t) do
+  if cond (get_row x 0) then check col indicies []
 
 let load_table fname =
   Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
