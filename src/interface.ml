@@ -4,8 +4,35 @@ type direction =
   | UP
   | DOWN
 
-let select_pos = 0
-let select_coors = (0., 0.)
+type action =
+  | Move of direction
+  | Enter
+
+type day_selector = {
+  x : float;
+  mutable y : float;
+}
+
+type level_selector = {
+  x : float;
+  mutable y : float;
+}
+
+type name_selector = {
+  x : float;
+  mutable y : float;
+}
+
+type state = {
+  mutable day : day_selector;
+  mutable level : level_selector;
+  mutable name : name_selector;
+  mutable select_pos : int;
+}
+
+let init_days : day_selector = { x = 100.; y = 400. }
+let init_level : level_selector = { x = 300.; y = 350. }
+let init_name : name_selector = { x = 500.; y = 400. }
 let font = Glut.BITMAP_HELVETICA_18
 
 let drawString ?(font = font) x y s =
@@ -23,21 +50,33 @@ let render_box x y color =
   GlDraw.color (255., 255., 255.);
   GlDraw.ends ()
 
-let move (dir : direction) =
-  match dir with
-  | LEFT ->
-      render_box (fst select_coors) (snd select_coors) (0., 0., 0.);
-      if select_pos == 1 then
-        render_box 500. (snd select_coors) (0., 255., 0.)
-      else
-        render_box
-          (fst select_coors +. 200.)
-          (snd select_coors) (0., 255., 0.)
-  | RIGHT -> raise (Failure "Unimplemented")
-  | UP -> raise (Failure "Unimplemented")
-  | DOWN -> raise (Failure "Unimplemented")
+let controller state action =
+  match action with
+  | Move direction -> begin
+      match direction with
+      | LEFT ->
+          if state.select_pos == 1 then ()
+          else if state.select_pos == 2 then state.select_pos <- 1
+          else if state.select_pos == 3 then state.select_pos <- 2
+      | RIGHT ->
+          if state.select_pos == 3 then ()
+          else if state.select_pos == 2 then state.select_pos <- 3
+          else if state.select_pos == 1 then state.select_pos <- 2
+      | UP -> raise (Failure "Unimplemented")
+      (* state.level.y <- state.level.y -. 200. *)
+      | DOWN -> raise (Failure "Unimplemented")
+    end
+  | Enter -> raise (Failure "Unimplemented")
 
-let render () =
+let init () =
+  {
+    day = init_days;
+    level = init_level;
+    name = init_name;
+    select_pos = 1;
+  }
+
+let render (state : state) =
   GlClear.clear [ `color ];
   drawString 100. 530.
     "1. Use arrow keys to select your search options.";
@@ -54,9 +93,13 @@ let render () =
   drawString 500. 400. "A-F";
   drawString 500. 350. "G-P";
   drawString 500. 300. "Q-Z";
-  render_box 300. 350. (255., 255., 255.);
-  render_box 500. 400. (255., 255., 255.);
-  render_box 100. 400. (0., 255., 0.);
-  select_pos = 1;
-  select_coors = (100., 400.);
+  if state.select_pos == 1 then
+    render_box state.day.x state.day.y (0., 255., 0.)
+  else render_box state.day.x state.day.y (255., 255., 255.);
+  if state.select_pos == 2 then
+    render_box state.level.x state.level.y (0., 255., 0.)
+  else render_box state.level.x state.level.y (255., 255., 255.);
+  if state.select_pos == 3 then
+    render_box state.name.x state.name.y (0., 255., 0.)
+  else render_box state.name.x state.name.y (255., 255., 255.);
   Glut.swapBuffers ()
