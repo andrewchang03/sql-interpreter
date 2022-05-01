@@ -1,9 +1,16 @@
-(** Implementation of database command parser modeled after SQL. *)
+type data_type =
+  | INT
+  | FLOAT
+  | BOOL
+  | STRING
+  | CHAR
+  | UNSUPPORTED of string
 
 (* INSERT INTO table_name col1 col2 ... VALUES val1 val2 ... *)
 type insert_phrase = {
   table_name : string;
-  col_names : string list; (* [col1; col2; ...] *)
+  cols : (string * data_type) list;
+  (* [(col1, datatype); (col2, dataype); ...] *)
   vals : string list; (* [val1; val2; ...] *)
 }
 
@@ -11,14 +18,6 @@ type alter_type =
   | ADD
   | DROP
   | MODIFY
-  | UNSUPPORTED of string
-
-type data_type =
-  | INT
-  | FLOAT
-  | BOOL
-  | STRING
-  | CHAR
   | UNSUPPORTED of string
 
 (* ALTER TABLE table_name ADD column_name datatype *)
@@ -65,8 +64,14 @@ type delete_phrase = {
   cond : condition;
 }
 
+(* CREATE TABLE table_name col1 datatype col2 datatype ... *)
+type create_phrase = {
+  table_name : string;
+  cols : (string * data_type) list;
+}
+
 type command =
-  | CreateTable of string
+  | CreateTable of create_phrase
   | DropTable of string
   | AlterTable of alter_phrase
   | Select of select_phrase
@@ -77,18 +82,16 @@ type command =
   | LoadTable of string
   | DisplayTable of string
   | ListTables
+  | QueriesHelp
   | Help
   | Quit
 
-(* let create_table = failwith "Unimplemented: create_table" let
-   drop_table = failwith "Unimplemented: drop_table" let select_op =
-   failwith "Unimplemented: select_op" let insert_op = failwith
-   "Unimplemented: insert_op" let update_op = failwith "Unimplemented:
-   update_op" let delete_op = failwith "Unimplemented: delete_op" *)
 exception Empty
 exception Malformed
+exception DuplicateName of string
 exception NoTable
 
+(* PARSER FUNCTIONS *)
 let parse_alter t_name alter_type column_name column_type : alter_phrase
     =
   {
@@ -155,11 +158,34 @@ let parse_select (lst : string list) : select_phrase =
     col_names = get_items_before lst "FROM";
   }
 
+(** [parse_cols cols] takes in a list of columns [cols] formatted as [\[
+    colname1 datatype; colname2 datatype; ... \]] and converts them into
+    [\[\ (colname1, datatype); (colname2, datatype), ... ]] *)
+let parse_cols (cols : string list) =
+  List.iter print_string cols;
+  List.map
+    (fun col ->
+      let col_data = String.split_on_char '_' col in
+      match col_data with
+      | [ n; t ] ->
+          let dt =
+            match t with
+            | "int" -> INT
+            | "float" -> FLOAT
+            | "bool" -> BOOL
+            | "char" -> CHAR
+            | "string" -> STRING
+            | _ -> UNSUPPORTED t
+          in
+          (n, dt)
+      | _ -> raise Malformed)
+    cols
+
 let parse_insert (t_name : string) (lst : string list) : insert_phrase =
   let cols = get_items_before lst "VALUES" in
   let vals = get_items_after lst "VALUES" in
   if List.length cols <> List.length vals then raise Malformed
-  else { table_name = t_name; col_names = cols; vals }
+  else { table_name = t_name; cols = parse_cols cols; vals }
 
 let parse_condition = function
   | [ l; o; r ] ->
@@ -187,13 +213,35 @@ let parse_update (t_name : string) (lst : string list) : update_phrase =
 let parse_delete (t_name : string) (lst : string list) : delete_phrase =
   { table_name = t_name; cond = parse_condition lst }
 
+let rec create_parse_cols (lst : string list) :
+    (string * data_type) list =
+  match lst with
+  | [] -> []
+  | name :: data :: t ->
+      let dt =
+        match data with
+        | "int" -> INT
+        | "float" -> FLOAT
+        | "bool" -> BOOL
+        | "string" -> STRING
+        | "char" -> CHAR
+        | _ -> UNSUPPORTED data
+      in
+      (name, dt) :: create_parse_cols t
+  | _ -> raise Malformed
+
+let parse_create (t_name : string) (lst : string list) : create_phrase =
+  try { table_name = t_name; cols = create_parse_cols lst }
+  with Malformed -> raise Malformed
+
 let parse str =
   match
     List.filter
       (fun s -> String.length s > 0)
       (String.split_on_char ' ' str)
   with
-  | [ "CREATE"; "TABLE"; t ] -> CreateTable t
+  | "CREATE" :: "TABLE" :: table_name :: t ->
+      CreateTable (parse_create table_name t)
   | [ "DROP"; "TABLE"; t ] -> DropTable t
   | [ "ALTER"; "TABLE"; table_name; alter_type; col_name; col_type ] ->
       AlterTable (parse_alter table_name alter_type col_name col_type)
@@ -207,6 +255,7 @@ let parse str =
   | [ "load"; table_name ] -> LoadTable table_name
   | [ "display"; table_name ] -> DisplayTable table_name
   | [ "list" ] -> ListTables
+  | [ "queries"; "help" ] -> QueriesHelp
   | [ "help" ] -> Help
   | [ "quit" ] -> Quit
   | [] -> raise Empty

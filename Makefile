@@ -12,6 +12,9 @@ test:
 run:
 	OCAMLRUNPARAM=b dune exec terminal/main.exe
 
+app:
+	dune exec app/main.exe
+
 zip:
 	rm -f database.zip
 	zip -r database.zip . -x@exclude.lst
@@ -20,7 +23,7 @@ clean:
 	dune clean
 	rm -f database.zip
 
-doc:
+docs:
 	dune build @doc
 
 linecount:
