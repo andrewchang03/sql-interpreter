@@ -54,6 +54,12 @@ type select_phrase = {
 }
 (** [select_phrase] provides the AST for SELECT queries *)
 
+type select_where_phrase = {
+  table_name : string;
+  col_names : string list;
+  cond : condition;
+}
+
 type update_phrase = {
   table_name : string;
   col_names : string list;
@@ -80,6 +86,7 @@ type command =
   | DropTable of string
   | AlterTable of alter_phrase
   | Select of select_phrase
+  | SelectWhere of select_where_phrase
   | SelectAll of string
   | InsertInto of insert_phrase
   | Update of update_phrase

@@ -28,12 +28,6 @@ type alter_phrase = {
   col_type : data_type;
 }
 
-(* SELECT col1 col2 ... FROM table_name *)
-type select_phrase = {
-  table_name : string;
-  col_names : string list; (* [col1; col2; ...] *)
-}
-
 type operator =
   | LESS
   | GREATER
@@ -47,6 +41,19 @@ type condition = {
   left : string;
   right : string;
   op : operator;
+}
+
+(* SELECT col1 col2 ... FROM table_name *)
+type select_phrase = {
+  table_name : string;
+  col_names : string list; (* [col1; col2; ...] *)
+}
+
+(* SELECT col1 col2 ... FROM table_name WHERE condition *)
+type select_where_phrase = {
+  table_name : string;
+  col_names : string list; (* [col1; col2; ...] *)
+  cond : condition;
 }
 
 (* UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE
@@ -75,6 +82,7 @@ type command =
   | DropTable of string
   | AlterTable of alter_phrase
   | Select of select_phrase
+  | SelectWhere of select_where_phrase
   | SelectAll of string
   | InsertInto of insert_phrase
   | Update of update_phrase
@@ -120,7 +128,7 @@ let parse_alter t_name alter_type column_name column_type : alter_phrase
 let rec parse_from_table lst =
   match lst with
   | [] -> raise Malformed
-  | [ "FROM"; t_name ] -> t_name
+  | "FROM" :: t_name :: t -> t_name
   | _ :: t -> parse_from_table t
 
 let rec index lst elem =
@@ -152,10 +160,32 @@ let rec get_items_between lst start_word stop_word =
   | start :: t when start = start_word -> get_items_before t stop_word
   | _ :: t -> get_items_between t start_word stop_word
 
+let parse_condition = function
+  | [ l; o; r ] ->
+      {
+        left = l;
+        right = r;
+        op =
+          (if o = "<" then LESS
+          else if o = ">" then GREATER
+          else if o = "=" then EQ
+          else if o = "<=" then LE
+          else if o = ">=" then GE
+          else UNSUPPORTED o);
+      }
+  | _ -> raise Malformed
+
 let parse_select (lst : string list) : select_phrase =
   {
     table_name = parse_from_table lst;
     col_names = get_items_before lst "FROM";
+  }
+
+let parse_select_where (lst : string list) : select_where_phrase =
+  {
+    table_name = parse_from_table lst;
+    col_names = get_items_before lst "FROM";
+    cond = parse_condition (get_items_after lst "WHERE");
   }
 
 (** [parse_cols cols] takes in a list of columns [cols] formatted as [\[
@@ -186,21 +216,6 @@ let parse_insert (t_name : string) (lst : string list) : insert_phrase =
   let vals = get_items_after lst "VALUES" in
   if List.length cols <> List.length vals then raise Malformed
   else { table_name = t_name; cols = parse_cols cols; vals }
-
-let parse_condition = function
-  | [ l; o; r ] ->
-      {
-        left = l;
-        right = r;
-        op =
-          (if o = "<" then LESS
-          else if o = ">" then GREATER
-          else if o = "=" then EQ
-          else if o = "<=" then LE
-          else if o = ">=" then GE
-          else UNSUPPORTED o);
-      }
-  | _ -> raise Malformed
 
 let parse_update (t_name : string) (lst : string list) : update_phrase =
   {
@@ -246,6 +261,8 @@ let parse str =
   | [ "ALTER"; "TABLE"; table_name; alter_type; col_name; col_type ] ->
       AlterTable (parse_alter table_name alter_type col_name col_type)
   | [ "SELECT"; "ALL"; t ] -> SelectAll t
+  | "SELECT" :: t when List.mem "WHERE" t ->
+      SelectWhere (parse_select_where t)
   | "SELECT" :: t -> Select (parse_select t)
   | "INSERT" :: "INTO" :: table_name :: t ->
       InsertInto (parse_insert table_name t)
