@@ -162,7 +162,7 @@ let parse_select (lst : string list) : select_phrase =
     colname1 datatype; colname2 datatype; ... \]] and converts them into
     [\[\ (colname1, datatype); (colname2, datatype), ... ]] *)
 let parse_cols (cols : string list) =
-  List.iter print_string cols;
+  (* List.iter print_string cols; *)
   List.map
     (fun col ->
       let col_data = String.split_on_char '_' col in

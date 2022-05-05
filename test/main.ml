@@ -1,3 +1,21 @@
+(** TEST PLAN: We tested mainly two components of our system: parsing
+    the queries, and ensuring that the queries work on our database
+    properly. Testing parsers is necessary to ensure that our queries
+    are understood properly by our system. We omitted testing graphics
+    because frankly, graphics cannot be tested with a certain output via
+    OUnit. Instead, we manually tested it by seeing whether the gui
+    displays the information we expect. Test cases were developed glass
+    box mainly because we need to account for different incorrect parser
+    inputs, but black box approach was mainly used for testing the
+    correctness of query implementations. Essentially, Command module
+    was tested glass box with OUnit. Table module was tested glassbox
+    with OUnit to an extent, but it requires us to manually create
+    expected csv output files and do other intermediary steps. Interface
+    module was manaully tested. Overall, while it may not be perfect,
+    this should demonstrate the correctness of our system as it should
+    perform the expected operations when queries that satisfy the
+    precondition well are provided. *)
+
 open OUnit2
 open Database
 open Table
@@ -64,6 +82,18 @@ let parse_tests =
       (parse
          "UPDATE people first_name last_name VALUES katherine heatzig \
           WHERE office = gates");
+    test "parse UPDATE unsupported operator"
+      (Update
+         {
+           table_name = "people";
+           col_names = [ "first_name"; "last_name" ];
+           vals = [ "katherine"; "heatzig" ];
+           cond =
+             { left = "office"; op = UNSUPPORTED "=="; right = "gates" };
+         })
+      (parse
+         "UPDATE people first_name last_name VALUES katherine heatzig \
+          WHERE office == gates");
     test "parse ALTER TABLE"
       (AlterTable
          {
@@ -87,6 +117,8 @@ let parse_exns =
     test_exn "parse Empty" Empty (fun () -> parse " ");
     test_exn "unknown command" Malformed (fun () -> parse "view table");
     test_exn "wrong select all" Malformed (fun () -> parse "SELECT_ALL");
+    test_exn "DROP TABLE missing table" Malformed (fun () ->
+        parse "DROP TABLE");
     test_exn "parse SELECT Malformed, no table name" Malformed
       (fun () -> parse "SELECT column1 column2 FROM");
     test_exn "parse INSERT INTO, missing data types" Malformed
@@ -97,6 +129,12 @@ let parse_exns =
           "INSERT INTO table name string age int grade string VALUES");
     test_exn "CREATE TABLE missing data types" Malformed (fun () ->
         parse "CREATE TABLE people name age grade");
+    test_exn "DELETE TABLE missing table name" Malformed (fun () ->
+        parse "DELETE FROM WHERE CustomerName = Albert");
+    test_exn "DELETE TABLE no WHERE" Malformed (fun () ->
+        parse "DELETE FROM table_name CustomerName = Albert");
+    test_exn "DELETE TABLE no condition" Malformed (fun () ->
+        parse "DELETE FROM table_name WHERE");
   ]
 
 (* Table.ml tests *)

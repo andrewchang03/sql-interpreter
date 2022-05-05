@@ -84,13 +84,12 @@ let update
   let temp = update_helper [] col vals cond in
   new_table [] temp col t
 
-let update t cols vals cond =
-  raise (Stdlib.Failure "Unimplemented: update")
+let update t cols vals cond = raise (Stdlib.Failure "Update malformed.")
 
 let load_table fname =
   Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
 
-let rec get_table (tables : (string * Csv.t) list) name =
+let rec get_table (tables : (string * Csv.t) list) (name : string) =
   match tables with
   | [] -> []
   | (n, d) :: t when n = name -> d
@@ -102,12 +101,16 @@ let rec add_empty_cols (data : string list list) =
   | [] -> []
   | row :: tail -> ("" :: row) :: add_empty_cols tail
 
-let is_duplicate_col (t : Csv.t) col =
+let is_duplicate_col (t : Csv.t) (col : string) =
   match t with
   | cols :: t -> List.exists (fun col_name -> col_name = col) cols
   | [] -> raise NoTable
 
-let alter_table_add_helper (t : Csv.t) name col col_type =
+let alter_table_add_helper
+    (t : Csv.t)
+    (name : string)
+    (col : string)
+    (col_type : data_type) =
   let result =
     match t with
     | cols :: data ->
@@ -128,14 +131,23 @@ let alter_table_add_helper (t : Csv.t) name col col_type =
   Csv.save ("data" ^ Filename.dir_sep ^ name ^ ".csv") result;
   result
 
-let rec alter_add_in_place tables name col col_type before =
+let rec alter_add_in_place
+    (tables : (string * Csv.t) list)
+    (name : string)
+    (col : string)
+    (col_type : data_type)
+    (before : (string * Csv.t) list) =
   match tables with
   | [] -> raise NoTable
   | (n, d) :: t when n = name ->
       before @ [ (n, alter_table_add_helper d name col col_type) ] @ t
   | h :: t -> alter_add_in_place t name col col_type (before @ [ h ])
 
-let alter_table_add tables name col col_type =
+let alter_table_add
+    (tables : (string * Csv.t) list)
+    (name : string)
+    (col : string)
+    (col_type : data_type) =
   alter_add_in_place tables name col col_type []
 
 (* ALTER TABLE DROP *)
@@ -231,18 +243,9 @@ let insert
     | Malformed -> raise (Stdlib.Failure "Columns do not match values")
   else raise (Stdlib.Failure "Columns do not match values")
 
-(* let get_first_el lis = match lis with | [] -> [] | h :: t -> h
-
-   let remove_one_el lis = match lis with | [] -> [] | h :: t -> t
-
-   let rec update_helper acc col vals cond = match vals with | [] -> acc
-   | h :: t -> if cond h then update_helper (h @ acc) (remove_one_el
-   col) t cond else update_helper (get_first_el col @ acc)
-   (remove_one_el vals) t cond
-
-   let rec new_table acc (temp : 'a list) (col : 'a list) t = match t
-   with | [] -> [] | h :: t -> if h = col then new_table (acc @ [ temp
-   ]) temp col t else new_table (acc @ [ h ]) temp col t
-
-   let update t (col : 'a list) vals cond = let temp = update_helper []
-   col vals cond in new_table [] temp col t *)
+let rec new_table acc (temp : 'a list) (col : 'a list) t =
+  match t with
+  | [] -> []
+  | h :: t ->
+      if h = col then new_table (acc @ [ temp ]) temp col t
+      else new_table (acc @ [ h ]) temp col t
