@@ -9,7 +9,7 @@ let rec transpose_table (table : Csv.t) (n : int) : Csv.t =
     List.map (fun x -> List.nth x n) table
     :: transpose_table table (n + 1)
 
-let select table (col_names : string list) =
+let select (table : Csv.t) (col_names : string list) : Csv.t =
   transpose_table
     (List.filter
        (fun x -> List.mem (List.nth x 0) col_names)
@@ -45,7 +45,9 @@ let create_table fname (cols : (string * Command.data_type) list) =
   table
 
 (* DROP TABLE *)
-let drop_table tables name = List.filter (fun x -> fst x <> name) tables
+let drop_table (tables : (string * Csv.t) list) (name : string) :
+    (string * Csv.t) list =
+  List.filter (fun x -> fst x <> name) tables
 
 (* UPDATE TABLE *)
 

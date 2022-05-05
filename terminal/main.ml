@@ -84,7 +84,8 @@ let rec update_table_instance tables name =
    and calls the according function, [ask_command tables] prompts the
    user input for SQL command, tables is a live storage for every tables
    imported via load *)
-let rec loop_repl (tables : (string * Csv.t) list) =
+let rec loop_repl (tables : (string * Csv.t) list) :
+    (string * Csv.t) list =
   print_newline ();
   print_string "> ";
   let cmd = read_line () in
@@ -179,7 +180,8 @@ let rec loop_repl (tables : (string * Csv.t) list) =
       print_string "";
       loop_repl tables
 
-and load_table name tables =
+and load_table (name : string) (tables : (string * Csv.t) list) :
+    (string * Csv.t) list =
   match load ("data/" ^ name ^ ".csv") with
   | d ->
       print_string (name ^ " loaded.");

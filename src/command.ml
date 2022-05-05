@@ -92,8 +92,11 @@ exception DuplicateName of string
 exception NoTable
 
 (* PARSER FUNCTIONS *)
-let parse_alter t_name alter_type column_name column_type : alter_phrase
-    =
+let parse_alter
+    (t_name : string)
+    (alter_type : string)
+    (column_name : string)
+    (column_type : string) : alter_phrase =
   {
     table_name = t_name;
     alt_type =
@@ -117,7 +120,7 @@ let parse_alter t_name alter_type column_name column_type : alter_phrase
       end;
   }
 
-let rec parse_from_table lst =
+let rec parse_from_table (lst : string list) : string =
   match lst with
   | [] -> raise Malformed
   | [ "FROM"; t_name ] -> t_name
@@ -234,7 +237,7 @@ let parse_create (t_name : string) (lst : string list) : create_phrase =
   try { table_name = t_name; cols = create_parse_cols lst }
   with Malformed -> raise Malformed
 
-let parse str =
+let parse (str : string) : command =
   match
     List.filter
       (fun s -> String.length s > 0)

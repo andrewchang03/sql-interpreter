@@ -175,7 +175,8 @@ let table_suite =
   [
     create_test "empty" "new" [ ("col1", INT) ] [ [ "col1 int" ] ];
     insert_test "insert into table" insert_cols insert_first
-      insert_compare;
+      insert_compare
+    (* alter *);
   ]
 
 let suite =

@@ -17,7 +17,8 @@ val create_table : string -> (string * Command.data_type) list -> Csv.t
     [table_name] populated with [cols], which describes the name and
     data type of each column. Returns: the newly created table. *)
 
-val drop_table : ('a * 'b) list -> 'a -> ('a * 'b) list
+val drop_table :
+  (string * Csv.t) list -> string -> (string * Csv.t) list
 (** [drop_table tables name] deletes the table with [name] from
     [tables]. *)
 
