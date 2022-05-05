@@ -9,12 +9,12 @@ let test (test_name : string) expected_output actual_output : test =
   test_name >:: fun _ -> assert_equal expected_output actual_output
 
 (* format for testing functions that return exceptions *)
-let test_exn (test_name : string) expected_output actual_output : test =
+let test_exn (test_name : string) (expected_output : exn) actual_output
+    : test =
   test_name >:: fun _ -> assert_raises expected_output actual_output
 
 let parse_tests =
   [
-    test_exn "parse Empty" Empty (fun () -> parse " ");
     test "parse Help" Help (parse "help");
     test "parse QueriesHelp" QueriesHelp (parse "queries help");
     test "parse Quit" Quit (parse "quit");
@@ -24,33 +24,55 @@ let parse_tests =
       (parse "display table");
     test "parse DROP TABLE" (DropTable "table")
       (parse "DROP TABLE table");
-    test "parse SELECT"
-      (Select { table_name = "people"; col_names = [ "a"; "b" ] })
-      (parse "SELECT a b FROM people");
-    (*test "parse SELECT" (Select { table_name = "people"; col_names = [
-      "a"; "b c" ] }) (parse "SELECT a b_c FROM people");*)
+    test "parse SELECT one"
+      (Select { table_name = "people"; col_names = [ "first_name" ] })
+      (parse "SELECT first_name FROM people");
+    test "parse SELECT multiple"
+      (Select
+         {
+           table_name = "people";
+           col_names = [ "first_name"; "last_name"; "birth_year" ];
+         })
+      (parse "SELECT first_name last_name birth_year FROM people");
     test "parse SELECT ALL" (SelectAll "table")
       (parse "SELECT ALL table");
-    test_exn "parse SELECT Malformed" Malformed (fun () ->
-        parse "SELECT a b FROM");
     test "parse INSERT INTO"
       (InsertInto
          {
-           table_name = "table";
-           cols = [ ("a", INT); ("b", INT) ];
-           vals = [ "1"; "2" ];
+           table_name = "people";
+           cols = [ ("name", STRING); ("age", INT); ("grade", STRING) ];
+           vals = [ "henry"; "24"; "A+" ];
          })
-      (parse "INSERT INTO table a_int b_int VALUES 1 2");
+      (parse
+         "INSERT INTO people name_string age_int grade_string VALUES \
+          henry 24 A+");
+    test "parse CREATE TABLE"
+      (CreateTable
+         {
+           table_name = "people";
+           cols = [ ("name", STRING); ("age", INT); ("grade", STRING) ];
+         })
+      (parse "CREATE TABLE people name string age int grade string");
     test "parse UPDATE"
       (Update
          {
-           table_name = "table_name";
-           col_names = [ "col1"; "col2" ];
-           vals = [ "val1"; "val2" ];
-           cond = { left = "id"; op = EQ; right = "1" };
+           table_name = "people";
+           col_names = [ "first_name"; "last_name" ];
+           vals = [ "katherine"; "heatzig" ];
+           cond = { left = "office"; op = EQ; right = "gates" };
          })
-      (parse "UPDATE table_name col1 col2 VALUES val1 val2 WHERE id = 1");
-    (*test "parse CREATE TABLE"; test "parse ALTER TABLE";*)
+      (parse
+         "UPDATE people first_name last_name VALUES katherine heatzig \
+          WHERE office = gates");
+    test "parse ALTER TABLE"
+      (AlterTable
+         {
+           table_name = "people";
+           alt_type = ADD;
+           col_name = "age";
+           col_type = INT;
+         })
+      (parse "ALTER TABLE people ADD age int");
     test "parse DELETE"
       (Delete
          {
@@ -58,6 +80,23 @@ let parse_tests =
            cond = { left = "CustomerName"; op = EQ; right = "Albert" };
          })
       (parse "DELETE FROM table_name WHERE CustomerName = Albert");
+  ]
+
+let parse_exns =
+  [
+    test_exn "parse Empty" Empty (fun () -> parse " ");
+    test_exn "unknown command" Malformed (fun () -> parse "view table");
+    test_exn "wrong select all" Malformed (fun () -> parse "SELECT_ALL");
+    test_exn "parse SELECT Malformed, no table name" Malformed
+      (fun () -> parse "SELECT column1 column2 FROM");
+    test_exn "parse INSERT INTO, missing data types" Malformed
+      (fun () ->
+        parse "INSERT INTO table name age grade VALUES henry 24 A+");
+    test_exn "parse INSERT INTO, no values" Malformed (fun () ->
+        parse
+          "INSERT INTO table name string age int grade string VALUES");
+    test_exn "CREATE TABLE missing data types" Malformed (fun () ->
+        parse "CREATE TABLE people name age grade");
   ]
 
 (* Table.ml tests *)
@@ -101,5 +140,8 @@ let table_suite =
       insert_compare;
   ]
 
-let suite = "Test suites" >::: List.flatten [ parse_tests; table_suite ]
+let suite =
+  "Test suites"
+  >::: List.flatten [ parse_tests; parse_exns; table_suite ]
+
 let _ = run_test_tt_main suite

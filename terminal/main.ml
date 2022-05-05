@@ -85,17 +85,25 @@ let rec update_table_instance tables name =
    user input for SQL command, tables is a live storage for every tables
    imported via load *)
 let rec loop_repl (tables : (string * Csv.t) list) =
-  print_string "\n> ";
+  print_newline ();
+  print_string "> ";
   let cmd = read_line () in
   match parse cmd with
+  | LoadTable name -> load_table name tables
   | DropTable name ->
       if List.mem_assoc name tables then
         Sys.remove ("data/" ^ name ^ ".csv")
-      else ();
+      else print_string "table not found.\n";
       loop_repl (drop_table tables name)
-  | LoadTable name ->
-      let data = load ("data/" ^ name ^ ".csv") in
-      loop_repl (tables @ [ (name, data) ])
+  | QueriesHelp ->
+      print_string (String.concat "\n" queries_help);
+      print_newline ();
+      loop_repl tables
+  | Help ->
+      print_string (String.concat "\n" help);
+      print_newline ();
+      loop_repl tables
+  | Quit -> Stdlib.exit 0
   | CreateTable s -> begin
       try
         let data = create_table s.table_name s.cols in
@@ -117,7 +125,8 @@ let rec loop_repl (tables : (string * Csv.t) list) =
           print_readable t;
           loop_repl tables
       | exception Not_found ->
-          print_string "Table not found. Please try again.\n";
+          print_string "Table not found. Please try again.";
+          print_newline ();
           loop_repl tables
     end
   | InsertInto phrase -> begin
@@ -162,18 +171,23 @@ let rec loop_repl (tables : (string * Csv.t) list) =
       | UNSUPPORTED s ->
           print_string ("Syntax\n         error at " ^ s);
           loop_repl tables)
-  | QueriesHelp ->
-      print_string (String.concat "\n" queries_help ^ "\n");
-      loop_repl tables
-  | Help ->
-      print_string (String.concat "\n" help ^ "\n");
-      loop_repl tables
-  | Quit -> Stdlib.exit 0
   | exception Malformed ->
-      print_string "Malformed command. Please try again.\n";
+      print_string "Malformed command. Please try again.";
+      print_newline ();
       loop_repl tables
   | _ ->
       print_string "";
+      loop_repl tables
+
+and load_table name tables =
+  match load ("data/" ^ name ^ ".csv") with
+  | d ->
+      print_string (name ^ " loaded.");
+      print_newline ();
+      loop_repl (tables @ [ (name, d) ])
+  | exception Sys_error s ->
+      print_string "file not found.";
+      print_newline ();
       loop_repl tables
 
 (** [main ()] initializes the repl *)
