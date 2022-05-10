@@ -159,12 +159,6 @@ let insert_multiple =
     [ "2"; "tiger"; "2027" ];
   ]
 
-(* let insert_test (name : string) cols vals expected_output : test =
-   name >:: fun _ -> let file = create_table "insert_test" insert_cols
-   in let inserted = insert "insert_test" cols vals in assert_equal
-   expected_output inserted Sys.remove ("data" ^ Filename.dir_sep ^
-   "insert_test.csv") *)
-
 let rec insert_list name cols = function
   | [] -> []
   | h :: t -> insert name cols h :: insert_list name cols t
