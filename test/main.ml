@@ -150,14 +150,41 @@ let create_test (name : string) (fname : string) cols expected_output :
 let insert_cols =
   [ ("id", INT); ("student_name", STRING); ("grad_year", INT) ]
 
-let insert_first = [ "0"; "dog"; "2025" ]
+let insert_first = [ [ "0"; "dog"; "2025" ] ]
 
-let insert_test (name : string) cols vals expected_output : test =
+let insert_multiple =
+  [
+    [ "0"; "dog"; "2025" ];
+    [ "1"; "cat"; "2026" ];
+    [ "2"; "tiger"; "2027" ];
+  ]
+
+(* let insert_test (name : string) cols vals expected_output : test =
+   name >:: fun _ -> let file = create_table "insert_test" insert_cols
+   in let inserted = insert "insert_test" cols vals in assert_equal
+   expected_output inserted Sys.remove ("data" ^ Filename.dir_sep ^
+   "insert_test.csv") *)
+
+let rec insert_list name cols = function
+  | [] -> []
+  | h :: t -> insert name cols h :: insert_list name cols t
+
+let insert_test
+    (name : string)
+    cols
+    (vals : string list list)
+    expected_output : test =
   name >:: fun _ ->
-  let file = create_table "insert_test" insert_cols in
-  let inserted = insert "insert_test" cols vals in
-  assert_equal expected_output inserted;
-  Sys.remove ("data" ^ Filename.dir_sep ^ "insert_test.csv")
+  let test_name = name ^ "_test" in
+  let file = create_table test_name cols in
+  let inserted = insert_list test_name cols (List.rev vals) in
+  let compare =
+    Csv.compare
+      (Csv.load ("data" ^ Filename.dir_sep ^ test_name ^ ".csv"))
+      (Csv.load ("data" ^ Filename.dir_sep ^ expected_output))
+  in
+  assert_equal compare 0;
+  Sys.remove ("data" ^ Filename.dir_sep ^ name ^ "_test.csv")
 
 let data_dir_prefix = "data" ^ Filename.dir_sep
 
@@ -174,8 +201,9 @@ let test_suite_1 = []
 let table_suite =
   [
     create_test "empty" "new" [ ("col1", INT) ] [ [ "col1 int" ] ];
-    insert_test "insert into table" insert_cols insert_first
-      insert_compare
+    insert_test "insert" insert_cols insert_first "insert_compare.csv";
+    insert_test "insert_multiple" insert_cols insert_multiple
+      "insert_multiple.csv"
     (* alter *);
   ]
 
