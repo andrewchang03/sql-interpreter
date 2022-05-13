@@ -83,7 +83,6 @@ val delete_table :
     [col_name], [op], [value] *)
 
 val update_table :
-  (string * Csv.t) list ->
   string ->
   string list ->
   string list ->

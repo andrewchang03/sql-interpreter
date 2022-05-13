@@ -328,7 +328,6 @@ let rec update_helper
       else h :: update_helper t cols vals indices (counter + 1)
 
 let update_table
-    (tables : (string * Csv.t) list)
     (table_name : string)
     (cols : string list)
     (vals : string list)
