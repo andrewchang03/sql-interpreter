@@ -62,9 +62,20 @@ let controller state action =
           if state.select_pos == 3 then ()
           else if state.select_pos == 2 then state.select_pos <- 3
           else if state.select_pos == 1 then state.select_pos <- 2
-      | UP -> raise (Failure "Unimplemented")
-      (* state.level.y <- state.level.y -. 200. *)
-      | DOWN -> raise (Failure "Unimplemented")
+      | UP ->
+          if state.select_pos == 1 && state.day.y > 300. then
+            state.day.y <- state.day.y -. 50.
+          else if state.select_pos == 2 && state.level.y > 300. then
+            state.level.y <- state.level.y -. 50.
+          else if state.select_pos == 3 && state.name.y > 300. then
+            state.name.y <- state.name.y -. 50.
+      | DOWN ->
+          if state.select_pos == 1 && state.day.y < 400. then
+            state.day.y <- state.day.y +. 50.
+          else if state.select_pos == 2 && state.level.y < 400. then
+            state.level.y <- state.level.y +. 50.
+          else if state.select_pos == 3 && state.name.y < 400. then
+            state.name.y <- state.name.y +. 50.
     end
   | Enter -> raise (Failure "Unimplemented")
 

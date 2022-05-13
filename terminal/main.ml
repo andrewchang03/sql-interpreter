@@ -199,10 +199,12 @@ let rec loop_repl (tables : (string * Csv.t) list) :
   | Update u -> begin
       try
         loop_repl
-          (( u.table_name,
-             update_table tables u.table_name u.cols u.vals u.cond.left
-               u.cond.op u.cond.right )
-          :: tables)
+          (List.filter (fun x -> fst x <> u.table_name) tables
+          @ [
+              ( u.table_name,
+                update_table u.table_name u.cols u.vals u.cond.left
+                  u.cond.op u.cond.right );
+            ])
       with Malformed -> loop_repl tables
     end
   | exception NoTable ->
