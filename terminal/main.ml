@@ -1,26 +1,27 @@
 open Database
-open Command
+open Parse
 open Table
 open Csv
-open Table
 
 let supported_queries =
   [
     "CREATE TABLE";
     "DROP TABLE";
     "SELECT";
+    "SELECT FROM";
     "SELECT ALL";
     "INSERT INTO";
+    "ALTER TABLE ADD";
     "DELETE FROM";
     "UPDATE";
-    "ALTER TABLE";
   ]
 
 let help =
   [
-    "SQL queries supported: " ^ String.concat " " supported_queries;
-    "NOTE: table names must be a single string without spaces, column \
-     names and values must be connected via _ if multiple words.";
+    "SQL queries supported: " ^ String.concat ", " supported_queries;
+    "NOTE: The precondtion for any csv files working with this \
+     database is that there are no spaces. Multiple words must be \
+     connected via _ or through other means.";
     "[load table_name] loads the csv file in data directory";
     "[display table_name] displays the table already loaded in or \
      created";
@@ -32,19 +33,22 @@ let help =
 
 let queries_help =
   [
-    "[CREATE TABLE table_name col1 datatype col2 datatype ...]";
+    "[CREATE TABLE table_name col1 col2 ...]";
     "[DROP TABLE table_name] removes table_name";
     "[SELECT col1 col2 ... FROM table_name] grabs col1 col2 ... from \
      table_name and returns them";
+    "[SELECT FROM table_name WHERE condition]";
     "[SELECT ALL table_name] returns the entire table";
-    "[INSERT INTO table_name col1_type col2_type ... VALUES val1 val2 \
-     ...] inserts val1 val2 ... under corresponding col1 col2 ... \
-     where type represents the col type into table_name";
+    "[INSERT INTO table_name col1:data_type col2:data_type ... VALUES \
+     val1 val2 ...] inserts val1 val2 ... under corresponding col1 \
+     col2 ... with data_type1 data_type2 ...";
+    "[ALTER TABLE table_name ADD / DROP / MODIFY column_name datatype]";
     "[DELETE FROM table_name WHERE condition]";
-    "[UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE\n\
-    \    condition] updates values under col1 and col2 that match \
+    "[UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE \
+     condition] updates values under col1 and col2 that match \
      condition with val1 val2 ...";
-    "[ALTER TABLE table_name ADD column_name datatype]";
+    "condition is the format of column_name operator value, and \
+     operators can be >, >=, <, <=, =";
   ]
 
 (* merge a string with multiple words into a single string with
@@ -62,13 +66,12 @@ let add_space s =
        (fun x -> String.length x > 0)
        (String.split_on_char '_' s))
 
-(* remove_space across the whole table, this is necessary because our
-   parser divides on spaces *)
-let remove_table_space table =
+(* remove_space across the whole table *)
+let remove_table_space (table : Csv.t) : Csv.t =
   List.map (fun x -> List.map remove_space x) table
 
 (* add_space across the whole table *)
-let add_table_space table =
+let add_table_space (table : Csv.t) : Csv.t =
   List.map (fun x -> List.map add_space x) table
 
 (* for updating table within the repl when the file updates, removes
@@ -90,22 +93,36 @@ let rec loop_repl (tables : (string * Csv.t) list) :
   print_string "> ";
   let cmd = read_line () in
   match parse cmd with
-  | LoadTable name -> load_table name tables
+  | LoadTable name -> load_table name tables (* fully functional *)
   | DropTable name ->
+      (* fully functional *)
       if List.mem_assoc name tables then
         Sys.remove ("data/" ^ name ^ ".csv")
       else print_string "table not found.\n";
       loop_repl (drop_table tables name)
+  | ListTables ->
+      (* fully functional *)
+      List.iter (fun x -> print_string (fst x ^ "\n")) tables;
+      loop_repl tables
+  | DisplayTable name ->
+      (* fully functional *)
+      print_readable
+        (add_table_space
+           (snd (List.find (fun x -> fst x = name) tables)));
+      loop_repl tables
   | QueriesHelp ->
+      (* fully functional *)
       print_string (String.concat "\n" queries_help);
       print_newline ();
       loop_repl tables
   | Help ->
+      (* fully functional *)
       print_string (String.concat "\n" help);
       print_newline ();
       loop_repl tables
-  | Quit -> Stdlib.exit 0
+  | Quit -> Stdlib.exit 0 (* fully functional *)
   | CreateTable s -> begin
+      (* fully functional *)
       try
         let data = create_table s.table_name s.cols in
         loop_repl (tables @ [ (s.table_name, data) ])
@@ -114,13 +131,20 @@ let rec loop_repl (tables : (string * Csv.t) list) :
         loop_repl tables
     end
   | Select s ->
+      (* fully functional *)
       print_readable
         (add_table_space
            (select
               (snd (List.find (fun x -> fst x = s.table_name) tables))
-              s.col_names));
+              s.cols));
+      loop_repl tables
+  | SelectWhere s ->
+      print_readable
+        (select_where_table tables s.table_name s.cond.left s.cond.op
+           s.cond.right);
       loop_repl tables
   | SelectAll s -> begin
+      (* fully functional *)
       match select_all tables s with
       | t ->
           print_readable t;
@@ -130,25 +154,14 @@ let rec loop_repl (tables : (string * Csv.t) list) :
           print_newline ();
           loop_repl tables
     end
-  | InsertInto phrase -> begin
-      try
-        let data = insert phrase.table_name phrase.cols phrase.vals in
-        (* let data = load ("data/" ^ phrase.table_name ^ ".csv") in *)
-        loop_repl
-          (update_table_instance tables phrase.table_name
-          @ [ (phrase.table_name, data) ])
-      with Stdlib.Failure f ->
-        print_string "Incorrect data type.";
-        loop_repl tables
-    end
-  | DisplayTable name ->
-      print_readable
-        (add_table_space
-           (snd (List.find (fun x -> fst x = name) tables)));
-      loop_repl tables
-  | ListTables ->
-      List.iter (fun x -> print_string (fst x ^ "\n")) tables;
-      loop_repl tables
+  | InsertInto phrase ->
+      (* fully functional *)
+      loop_repl
+        (List.filter (fun x -> fst x <> phrase.table_name) tables
+        @ [
+            ( phrase.table_name,
+              insert phrase.table_name phrase.cols phrase.vals );
+          ])
   | AlterTable p -> (
       match p.alt_type with
       | ADD -> (
@@ -162,21 +175,47 @@ let rec loop_repl (tables : (string * Csv.t) list) :
               loop_repl tables
           | exception NoTable ->
               print_string "This table does not exist in the database.";
+              print_newline ();
               loop_repl tables
           | valid_table_list -> loop_repl valid_table_list)
       | MODIFY ->
-          alter_table_modify tables p.table_name p.col_name p.col_type
+          loop_repl
+            (alter_table_modify tables p.table_name p.col_name
+               p.col_type)
       | DROP ->
           loop_repl
             (alter_table_drop tables p.table_name p.col_name p.col_type)
       | UNSUPPORTED s ->
-          print_string ("Syntax\n         error at " ^ s);
+          print_string ("Syntax error at " ^ s);
           loop_repl tables)
+  | Delete d -> begin
+      (* fully functional *)
+      try
+        loop_repl
+          (delete_table tables d.table_name d.cond.left d.cond.op
+             d.cond.right)
+      with Malformed -> loop_repl tables
+    end
+  | Update u -> begin
+      try
+        loop_repl
+          (( u.table_name,
+             update_table tables u.table_name u.cols u.vals u.cond.left
+               u.cond.op u.cond.right )
+          :: tables)
+      with Malformed -> loop_repl tables
+    end
+  | exception NoTable ->
+      print_string
+        "This table does not exist in the database. Please try again.";
+      print_newline ();
+      loop_repl tables
   | exception Malformed ->
       print_string "Malformed command. Please try again.";
       print_newline ();
       loop_repl tables
   | _ ->
+      (* for later additional implementations safety net *)
       print_string "";
       loop_repl tables
 

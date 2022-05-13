@@ -20,15 +20,20 @@ open OUnit2
 open Database
 open Table
 open Csv
-open Command
+open Parse
 
 (* format for testing regular functions *)
-let test (test_name : string) expected_output actual_output : test =
+let test
+    (test_name : string)
+    (expected_output : 'a)
+    (actual_output : 'a) : test =
   test_name >:: fun _ -> assert_equal expected_output actual_output
 
 (* format for testing functions that return exceptions *)
-let test_exn (test_name : string) (expected_output : exn) actual_output
-    : test =
+let test_exn
+    (test_name : string)
+    (expected_output : exn)
+    (actual_output : unit -> 'a) : test =
   test_name >:: fun _ -> assert_raises expected_output actual_output
 
 let parse_tests =
@@ -43,58 +48,94 @@ let parse_tests =
     test "parse DROP TABLE" (DropTable "table")
       (parse "DROP TABLE table");
     test "parse SELECT one"
-      (Select { table_name = "people"; col_names = [ "first_name" ] })
+      (Select { table_name = "people"; cols = [ "first_name" ] })
       (parse "SELECT first_name FROM people");
     test "parse SELECT multiple"
       (Select
          {
            table_name = "people";
-           col_names = [ "first_name"; "last_name"; "birth_year" ];
+           cols =
+             [
+               "first_name:string";
+               "last_name:string";
+               "birth_year:int";
+               "birth_month:int";
+             ];
          })
-      (parse "SELECT first_name last_name birth_year FROM people");
+      (parse
+         "SELECT first_name:string last_name:string birth_year:int \
+          birth_month:int FROM people");
+    test "parse SELECT FROM WHERE"
+      (SelectWhere
+         {
+           table_name = "students";
+           cond = { left = "grade"; op = EQ; right = "A" };
+         })
+      (parse "SELECT FROM students WHERE grade = A");
     test "parse SELECT ALL" (SelectAll "table")
       (parse "SELECT ALL table");
     test "parse INSERT INTO"
       (InsertInto
          {
            table_name = "people";
-           cols = [ ("name", STRING); ("age", INT); ("grade", STRING) ];
-           vals = [ "henry"; "24"; "A+" ];
+           cols =
+             [
+               "first_name:string";
+               "last_name:string";
+               "age:int";
+               "grade:string";
+             ];
+           vals = [ "henry"; "williams"; "24"; "A+" ];
          })
       (parse
-         "INSERT INTO people name_string age_int grade_string VALUES \
-          henry 24 A+");
+         "INSERT INTO people first_name:string last_name:string \
+          age:int grade:string VALUES henry williams 24 A+");
     test "parse CREATE TABLE"
       (CreateTable
          {
-           table_name = "people";
-           cols = [ ("name", STRING); ("age", INT); ("grade", STRING) ];
+           table_name = "students";
+           cols =
+             [
+               ("first_name", STRING);
+               ("last_name", STRING);
+               ("age", INT);
+               ("grade", STRING);
+             ];
          })
-      (parse "CREATE TABLE people name string age int grade string");
+      (parse
+         "CREATE TABLE students first_name string last_name string age \
+          int grade string");
     test "parse UPDATE"
       (Update
          {
            table_name = "people";
-           col_names = [ "first_name"; "last_name" ];
-           vals = [ "katherine"; "heatzig" ];
+           cols =
+             [
+               "first_name:string";
+               "last_name:string";
+               "birth_year:int";
+               "birth_month:int";
+             ];
+           vals = [ "katherine"; "heatzig"; "2001"; "12" ];
            cond = { left = "office"; op = EQ; right = "gates" };
          })
       (parse
-         "UPDATE people first_name last_name VALUES katherine heatzig \
-          WHERE office = gates");
+         "UPDATE people first_name:string last_name:string \
+          birth_year:int birth_month:int VALUES katherine heatzig 2001 \
+          12 WHERE office = gates");
     test "parse UPDATE unsupported operator"
       (Update
          {
            table_name = "people";
-           col_names = [ "first_name"; "last_name" ];
+           cols = [ "first_name:string"; "last_name:string" ];
            vals = [ "katherine"; "heatzig" ];
            cond =
              { left = "office"; op = UNSUPPORTED "=="; right = "gates" };
          })
       (parse
-         "UPDATE people first_name last_name VALUES katherine heatzig \
-          WHERE office == gates");
-    test "parse ALTER TABLE"
+         "UPDATE people first_name:string last_name:string VALUES \
+          katherine heatzig WHERE office == gates");
+    test "parse ALTER TABLE ADD"
       (AlterTable
          {
            table_name = "people";
@@ -103,13 +144,29 @@ let parse_tests =
            col_type = INT;
          })
       (parse "ALTER TABLE people ADD age int");
+    test "parse ALTER TABLE UNSUPPORTED"
+      (AlterTable
+         {
+           table_name = "processor";
+           alt_type = UNSUPPORTED "ADDX";
+           col_name = "manufacturer";
+           col_type = STRING;
+         })
+      (parse "ALTER TABLE processor ADDX manufacturer string");
     test "parse DELETE"
       (Delete
          {
            table_name = "table_name";
-           cond = { left = "CustomerName"; op = EQ; right = "Albert" };
+           cond =
+             {
+               left = "customer_full_name";
+               op = EQ;
+               right = "Alexander_Hamilton";
+             };
          })
-      (parse "DELETE FROM table_name WHERE CustomerName = Albert");
+      (parse
+         "DELETE FROM table_name WHERE customer_full_name = \
+          Alexander_Hamilton");
   ]
 
 let parse_exns =
@@ -121,88 +178,73 @@ let parse_exns =
         parse "DROP TABLE");
     test_exn "parse SELECT Malformed, no table name" Malformed
       (fun () -> parse "SELECT column1 column2 FROM");
-    test_exn "parse INSERT INTO, missing data types" Malformed
-      (fun () ->
-        parse "INSERT INTO table name age grade VALUES henry 24 A+");
     test_exn "parse INSERT INTO, no values" Malformed (fun () ->
-        parse
-          "INSERT INTO table name string age int grade string VALUES");
-    test_exn "CREATE TABLE missing data types" Malformed (fun () ->
-        parse "CREATE TABLE people name age grade");
+        parse "INSERT INTO table name age grade VALUES");
     test_exn "DELETE TABLE missing table name" Malformed (fun () ->
         parse "DELETE FROM WHERE CustomerName = Albert");
     test_exn "DELETE TABLE no WHERE" Malformed (fun () ->
         parse "DELETE FROM table_name CustomerName = Albert");
     test_exn "DELETE TABLE no condition" Malformed (fun () ->
         parse "DELETE FROM table_name WHERE");
+    test_exn "ALTER TABLE no data type" Malformed (fun () ->
+        parse "ALTER TABLE people ADD age");
+    test_exn "ALTER TABLE no table name" Malformed (fun () ->
+        parse "ALTER TABLE ADD age int");
+    test_exn "ALTER TABLE no operation specification ADD" Malformed
+      (fun () -> parse "ALTER TABLE table_name age int");
   ]
 
-(* Table.ml tests *)
-
-(** [update_test name table cols vals cond expected_output] constructs
-    an OUnit test named [name] that asserts the quality of
-    [expected_output] with [update name table cols vals cond]. *)
-let create_test (name : string) (fname : string) cols expected_output :
-    test =
-  name >:: fun _ ->
-  assert_equal expected_output (create_table fname cols)
-
-let insert_cols =
-  [ ("id", INT); ("student_name", STRING); ("grad_year", INT) ]
-
-let insert_first = [ [ "0"; "dog"; "2025" ] ]
-
-let insert_multiple =
+(* Table operations tests *)
+let query_tests =
   [
-    [ "0"; "dog"; "2025" ];
-    [ "1"; "cat"; "2026" ];
-    [ "2"; "tiger"; "2027" ];
-  ]
-
-let rec insert_list name cols = function
-  | [] -> []
-  | h :: t -> insert name cols h :: insert_list name cols t
-
-let insert_test
-    (name : string)
-    cols
-    (vals : string list list)
-    expected_output : test =
-  name >:: fun _ ->
-  let test_name = name ^ "_test" in
-  let file = create_table test_name cols in
-  let inserted = insert_list test_name cols (List.rev vals) in
-  let compare =
-    Csv.compare
-      (Csv.load ("data" ^ Filename.dir_sep ^ test_name ^ ".csv"))
-      (Csv.load ("data" ^ Filename.dir_sep ^ expected_output))
-  in
-  assert_equal compare 0;
-  Sys.remove ("data" ^ Filename.dir_sep ^ name ^ "_test.csv")
-
-let data_dir_prefix = "data" ^ Filename.dir_sep
-
-let students_table =
-  Csv.load ("data" ^ Filename.dir_sep ^ "students.csv")
-
-let insert_compare =
-  Csv.load ("data" ^ Filename.dir_sep ^ "insert_compare.csv")
-
-(* Empty test suite template *)
-let test_suite_1 = []
-
-(* Table.ml test suite *)
-let table_suite =
-  [
-    create_test "empty" "new" [ ("col1", INT) ] [ [ "col1 int" ] ];
-    insert_test "insert" insert_cols insert_first "insert_compare.csv";
-    insert_test "insert_multiple" insert_cols insert_multiple
-      "insert_multiple.csv"
-    (* alter *);
+    test "CREATE TABLE file creation with columns"
+      (let _ =
+         Csv.save
+           ("data" ^ Filename.dir_sep ^ "create_compare" ^ ".csv")
+           [
+             [
+               "first_name:string";
+               "last_name:string";
+               "age:int";
+               "grade:string";
+             ];
+           ]
+       in
+       Csv.load ("data" ^ Filename.dir_sep ^ "create_compare" ^ ".csv"))
+      (create_table "create"
+         [
+           ("first_name", STRING);
+           ("last_name", STRING);
+           ("age", INT);
+           ("grade", STRING);
+         ]);
+    test "SELECT columns"
+      [
+        [ "name:string"; "age:int" ];
+        [ "michael"; "15" ];
+        [ "robert"; "30" ];
+        [ "cornell"; "100" ];
+        [ "mesut"; "20" ];
+      ]
+      (let table =
+         Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
+       in
+       select table [ "name:string"; "age:int" ]);
+    test "INSERT INTO one"
+      (Csv.load ("data" ^ Filename.dir_sep ^ "create_compare" ^ ".csv")
+      @ [ [ "jenna"; "parker"; "19"; "B+" ] ])
+      (insert "create"
+         [
+           "first_name:string";
+           "last_name:string";
+           "age:int";
+           "grade:string";
+         ]
+         [ "jenna"; "parker"; "19"; "B+" ]);
   ]
 
 let suite =
   "Test suites"
-  >::: List.flatten [ parse_tests; parse_exns; table_suite ]
+  >::: List.flatten [ parse_tests; parse_exns; query_tests ]
 
 let _ = run_test_tt_main suite
