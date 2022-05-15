@@ -14,6 +14,14 @@ type alter_type =
   | MODIFY
   | UNSUPPORTED of string
 
+(* ALTER TABLE table_name ADD column_name datatype *)
+type alter_phrase = {
+  table_name : string;
+  alt_type : alter_type;
+  col_name : string;
+  col_type : data_type;
+}
+
 type operator =
   | LESS
   | GREATER
@@ -55,6 +63,19 @@ type select_phrase = {
 (* SELECT FROM table_name WHERE cond *)
 type select_where_phrase = {
   table_name : string;
+  cond : condition;
+}
+
+(* SELECT col1 col2 ... FROM table_name *)
+type select_phrase = {
+  table_name : string;
+  col_names : string list; (* [col1; col2; ...] *)
+}
+
+(* SELECT col1 col2 ... FROM table_name WHERE condition *)
+type select_where_phrase = {
+  table_name : string;
+  col_names : string list; (* [col1; col2; ...] *)
   cond : condition;
 }
 
@@ -103,7 +124,37 @@ exception Malformed
 exception DuplicateName of string
 exception NoTable
 
-(* PARSER HELPER FUNCTIONS *)
+(* PARSER FUNCTIONS *)
+let parse_alter t_name alter_type column_name column_type : alter_phrase
+    =
+  {
+    table_name = t_name;
+    alt_type =
+      begin
+        match alter_type with
+        | "ADD" -> ADD
+        | "DROP" -> DROP
+        | "MODIFY" -> MODIFY
+        | _ -> UNSUPPORTED alter_type
+      end;
+    col_name = column_name;
+    col_type =
+      begin
+        match column_type with
+        | "int" -> INT
+        | "float" -> FLOAT
+        | "bool" -> BOOL
+        | "char" -> CHAR
+        | "string" -> STRING
+        | _ -> UNSUPPORTED column_type
+      end;
+  }
+
+let rec parse_from_table lst =
+  match lst with
+  | [] -> raise Malformed
+  | "FROM" :: t_name :: t -> t_name
+  | _ :: t -> parse_from_table t
 
 let rec index (lst : string list) (elem : string) : int =
   match lst with
@@ -154,6 +205,19 @@ let parse_condition = function
       }
   | _ -> raise Malformed
 
+let parse_select (lst : string list) : select_phrase =
+  {
+    table_name = parse_from_table lst;
+    col_names = get_items_before lst "FROM";
+  }
+
+let parse_select_where (lst : string list) : select_where_phrase =
+  {
+    table_name = parse_from_table lst;
+    col_names = get_items_before lst "FROM";
+    cond = parse_condition (get_items_after lst "WHERE");
+  }
+
 (** [parse_cols cols] takes in a list of columns [cols] formatted as [\[
     colname1 datatype; colname2 datatype; ... \]] and converts them into
     [\[\ (colname1, datatype); (colname2, datatype), ... ]] *)
@@ -175,6 +239,23 @@ let parse_cols (cols : string list) : (string * data_type) list =
           (n, dt)
       | _ -> raise Malformed)
     cols
+
+let parse_insert (t_name : string) (lst : string list) : insert_phrase =
+  let cols = get_items_before lst "VALUES" in
+  let vals = get_items_after lst "VALUES" in
+  if List.length cols <> List.length vals then raise Malformed
+  else { table_name = t_name; cols = parse_cols cols; vals }
+
+let parse_update (t_name : string) (lst : string list) : update_phrase =
+  {
+    table_name = t_name;
+    col_names = get_items_before lst "VALUES";
+    vals = get_items_between lst "VALUES" "WHERE";
+    cond = parse_condition (get_items_after lst "WHERE");
+  }
+
+let parse_delete (t_name : string) (lst : string list) : delete_phrase =
+  { table_name = t_name; cond = parse_condition lst }
 
 let rec create_parse_cols (lst : string list) :
     (string * data_type) list =
@@ -284,6 +365,10 @@ let parse (str : string) : command =
   | [ "DROP"; "TABLE"; t ] -> DropTable t
   | [ "ALTER"; "TABLE"; table_name; alter_type; col_name; col_type ] ->
       AlterTable (parse_alter table_name alter_type col_name col_type)
+  | [ "SELECT"; "ALL"; t ] -> SelectAll t
+  | "SELECT" :: t when List.mem "WHERE" t ->
+      SelectWhere (parse_select_where t)
+  | "SELECT" :: t -> Select (parse_select t)
   | "INSERT" :: "INTO" :: table_name :: t ->
       InsertInto (parse_insert table_name t)
   | "UPDATE" :: table_name :: t -> Update (parse_update table_name t)
