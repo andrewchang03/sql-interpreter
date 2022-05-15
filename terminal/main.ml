@@ -239,10 +239,8 @@ let rec loop_repl (tables : (string * Csv.t) list) :
       print_string "Malformed command. Please try again.";
       print_newline ();
       loop_repl tables
-  | _ ->
-      (* for later additional implementations safety net *)
-      print_string "";
-      loop_repl tables
+(* | _ -> (* for later additional implementations safety net *)
+   print_string ""; loop_repl tables *)
 
 and load_table (name : string) (tables : (string * Csv.t) list) :
     (string * Csv.t) list =

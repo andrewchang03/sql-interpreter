@@ -76,7 +76,6 @@ type select_phrase = {
 (* SELECT col1 col2 ... FROM table_name WHERE condition *)
 type select_where_phrase = {
   table_name : string;
-  col_names : string list; (*[col1; col2; ...]*)
   cond : condition;
 }
 
@@ -236,7 +235,6 @@ let parse_select (lst : string list) : select_phrase =
 let parse_select_where (lst : string list) : select_where_phrase =
   {
     table_name = parse_from_table lst;
-    col_names = get_items_before lst "FROM";
     cond = parse_condition (get_items_after lst "WHERE");
   }
 
@@ -246,7 +244,7 @@ let parse_select_where (lst : string list) : select_where_phrase =
 let parse_cols (cols : string list) : (string * data_type) list =
   List.map
     (fun col ->
-      let col_data = String.split_on_char '_' col in
+      let col_data = String.split_on_char ':' col in
       match col_data with
       | [ n; t ] ->
           let dt =
@@ -310,7 +308,7 @@ let parse_select (lst : string list) : select_phrase =
 
 let parse_select_where (table_name : string) (cond_lst : string list) :
     select_where_phrase =
-  { table_name; col_names = []; cond = parse_condition cond_lst }
+  { table_name; cond = parse_condition cond_lst }
 
 let parse_create (table_name : string) (cols : string list) :
     create_phrase =

@@ -69,10 +69,9 @@ let parse_tests =
       (SelectWhere
          {
            table_name = "students";
-           col_names = [ "id"; "student_id"; "grad_year" ];
-           cond = { left = "grade"; op = EQ; right = "A" };
+           cond = { left = "grade:int"; op = EQ; right = "A" };
          })
-      (parse "SELECT FROM students WHERE grade = A");
+      (parse "SELECT FROM students WHERE grade:int = A");
     test "parse SELECT ALL" (SelectAll "table")
       (parse "SELECT ALL table");
     test "parse INSERT INTO"
@@ -275,15 +274,14 @@ let select_insert_tests =
       (Csv.load
          ("data" ^ Filename.dir_sep ^ "select_where_compare" ^ ".csv"))
       (let _ =
-         Csv.save "delete_copy"
+         Csv.save
+           ("data" ^ Filename.dir_sep ^ "delete_copy" ^ ".csv")
            (Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv"))
        in
        select_where_table
-         [
-           ( "select_where",
-             Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv") );
-         ]
-         "select_where" "name:string" EQ "cornell");
+         (Csv.load
+            ("data" ^ Filename.dir_sep ^ "select_where" ^ ".csv"))
+         "name:string" EQ "cornell");
     test "SELECT ALL from a table"
       (Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv"))
       (select_all
@@ -313,7 +311,8 @@ let conditional_query_tests =
     test "ALTER TABLE"
       (Csv.load ("data" ^ Filename.dir_sep ^ "alter_compare" ^ ".csv"))
       (let _ =
-         Csv.save "alter_copy"
+         Csv.save
+           ("data" ^ Filename.dir_sep ^ "alter_copy" ^ ".csv")
            (Csv.load ("data" ^ Filename.dir_sep ^ "alter" ^ ".csv"))
        in
        let _ =
@@ -329,7 +328,8 @@ let conditional_query_tests =
     test "DELETE FROM"
       (Csv.load ("data" ^ Filename.dir_sep ^ "delete_compare" ^ ".csv"))
       (let _ =
-         Csv.save "delete_copy"
+         Csv.save
+           ("data" ^ Filename.dir_sep ^ "delete_copy" ^ ".csv")
            (Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv"))
        in
        let _ =
@@ -345,16 +345,14 @@ let conditional_query_tests =
     test "UPDATE"
       (Csv.load ("data" ^ Filename.dir_sep ^ "update_compare" ^ ".csv"))
       (let _ =
-         Csv.save "update_copy"
+         Csv.save
+           ("data" ^ Filename.dir_sep ^ "update_copy" ^ ".csv")
            (Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv"))
        in
        let _ =
          update_table
-           [
-             ( "update_copy",
-               Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
-             );
-           ]
+           (* [ ( "update_copy", Csv.load ("data" ^ Filename.dir_sep ^
+              "sample" ^ ".csv") ); ] *)
            "update_copy"
            [ "id:int"; "name:string"; "age:int" ]
            [ "10"; "josephine"; "27" ]

@@ -1,0 +1,9 @@
+id:int,student_id:string,grad_year:int,grade:string
+0,dog,2025,B
+1,cat,2024,A
+2,tiger,2025,C
+3,zebra,2024,D
+4,panda,2027,A+
+5,dog,2029,B-
+6,bear,2025,A-
+7,cherry,2011,A

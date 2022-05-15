@@ -91,7 +91,7 @@ val update_table :
   operator ->
   string ->
   Csv.t
-(** [update_table tables table_name cols vals left op right] updates the
+(** [update_table table_name cols vals left op right] updates the
     entries in [table_name] where condition satisfies. *)
 
 val aggregate_int_columns :

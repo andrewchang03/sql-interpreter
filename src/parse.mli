@@ -81,7 +81,6 @@ type select_phrase = {
 
 type select_where_phrase = {
   table_name : string;
-  col_names : string list;
   cond : condition;
 }
 
