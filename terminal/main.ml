@@ -141,12 +141,13 @@ let rec loop_repl (tables : (string * Csv.t) list) :
         (add_table_space
            (select
               (snd (List.find (fun x -> fst x = s.table_name) tables))
-              s.cols));
+              s.col_names));
       loop_repl tables
   | SelectWhere s ->
       print_readable
-        (select_where_table tables s.table_name s.cond.left s.cond.op
-           s.cond.right);
+        (select_where_table
+           (snd (List.find (fun x -> fst x = s.table_name) tables))
+           s.cond.left s.cond.op s.cond.right);
       loop_repl tables
   | SelectAll s -> begin
       (* fully functional *)
@@ -204,10 +205,12 @@ let rec loop_repl (tables : (string * Csv.t) list) :
   | Update u -> begin
       try
         loop_repl
-          (( u.table_name,
-             update_table tables u.table_name u.cols u.vals u.cond.left
-               u.cond.op u.cond.right )
-          :: tables)
+          (List.filter (fun x -> fst x <> u.table_name) tables
+          @ [
+              ( u.table_name,
+                update_table u.table_name u.cols u.vals u.cond.left
+                  u.cond.op u.cond.right );
+            ])
       with Malformed -> loop_repl tables
     end
   | AggInt a ->

@@ -60,7 +60,7 @@ type condition = {
 
 type insert_phrase = {
   table_name : string;
-  cols : string list;
+  cols : (string * data_type) list;
   vals : string list;
 }
 (** [insert_phrase] provides the AST for INSERT INTO queries *)
@@ -75,7 +75,7 @@ type alter_phrase = {
 
 type select_phrase = {
   table_name : string;
-  cols : string list;
+  col_names : string list;
 }
 (** [select_phrase] provides the AST for SELECT queries *)
 

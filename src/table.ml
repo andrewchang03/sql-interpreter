@@ -56,19 +56,17 @@ let drop_table (tables : (string * Csv.t) list) (table_name : string) :
 
 let insert
     (table_name : string)
-    (col_names : string list)
+    (cols : (string * data_type) list)
     (vals : string list) : Csv.t =
   let table =
     Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
   in
-  if List.nth table 0 <> col_names then
-    failwith "column names do not match"
-  else begin
-    Csv.save
-      ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-      (table @ [ vals ]);
-    table @ [ vals ]
-  end
+  (* if List.nth table 0 <> cols then failwith "column names do not
+     match" *)
+  Csv.save
+    ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+    (table @ [ vals ]);
+  table @ [ vals ]
 
 (* ALTER TABLE ADD *)
 let rec add_empty_cols (data : string list list) : string list list =
@@ -130,10 +128,14 @@ let alter_table_add
   alter_add_in_place tables name col col_type []
 
 (* ALTER TABLE DROP *)
-let rec drop_cols (data : string list list) : string list list =
+let rec drop_cols (data : string list list) cols drop_col :
+    string list list =
   match data with
   | [] -> []
-  | row :: tail -> ("nan" :: row) :: drop_cols tail
+  | row :: tail ->
+      let assoc = List.combine cols row in
+      let removed_assoc = List.remove_assoc drop_col assoc in
+      snd (List.split removed_assoc) :: drop_cols tail cols drop_col
 
 let alter_table_drop_helper
     (t : Csv.t)
@@ -153,7 +155,7 @@ let alter_table_drop_helper
           | UNSUPPORTED s -> raise Malformed
         in
         List.filter (fun c -> c <> col_name ^ ":" ^ type_name) cols
-        :: drop_cols t
+        :: drop_cols t cols (col_name ^ ":" ^ type_name)
     | [] -> []
   in
   Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") new_table;
@@ -181,6 +183,7 @@ let alter_table_drop
     (col_type : data_type) : (string * Csv.t) list =
   alter_drop_in_place tables table_name col_name col_type []
 
+(* ALTER TABLE MODIFY *)
 let alter_table_modify
     (tables : (string * Csv.t) list)
     (table_name : string)
@@ -294,14 +297,11 @@ let rec select_where_helper
       else select_where_helper t indices (counter + 1)
 
 let select_where_table
-    (tables : (string * Csv.t) list)
-    (table_name : string)
+    (* (tables : (string * Csv.t) list) *)
+      (table : Csv.t)
     (col_name : string)
     (op : operator)
     (value : string) : Csv.t =
-  let table =
-    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-  in
   let select_rows =
     where_find_col (transpose_table table 0) col_name op value
   in
@@ -328,7 +328,6 @@ let rec update_helper
       else h :: update_helper t cols vals indices (counter + 1)
 
 let update_table
-    (tables : (string * Csv.t) list)
     (table_name : string)
     (cols : string list)
     (vals : string list)

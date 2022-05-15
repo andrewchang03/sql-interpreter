@@ -13,14 +13,14 @@ val select : Csv.t -> string list -> Csv.t
 (** [select table col_names] grabs columns in col_names from the table *)
 
 val select_where_table :
-  (string * Csv.t) list ->
-  string ->
+  (* (string * Csv.t) list -> *)
+  Csv.t ->
   string ->
   operator ->
   string ->
   Csv.t
-(** [select_where_table tables t c op v] grabs table entries that
-    satisfy the condition *)
+(** [select_where_table t c op v] grabs table entries that satisfy the
+    condition *)
 
 val select_all : (string * Csv.t) list -> string -> Csv.t
 (** [select_all tables table_name] returns the whole queried table *)
@@ -35,7 +35,8 @@ val drop_table :
 (** [drop_table tables name] deletes the table with [name] from
     [tables]. *)
 
-val insert : string -> string list -> string list -> Csv.t
+val insert :
+  string -> (string * Parse.data_type) list -> string list -> Csv.t
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table.
     Precondition: every row is input in order, missing values nan. *)
@@ -83,7 +84,6 @@ val delete_table :
     [col_name], [op], [value] *)
 
 val update_table :
-  (string * Csv.t) list ->
   string ->
   string list ->
   string list ->

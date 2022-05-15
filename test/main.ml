@@ -48,13 +48,13 @@ let parse_tests =
     test "parse DROP TABLE" (DropTable "table")
       (parse "DROP TABLE table");
     test "parse SELECT one"
-      (Select { table_name = "people"; cols = [ "first_name" ] })
+      (Select { table_name = "people"; col_names = [ "first_name" ] })
       (parse "SELECT first_name FROM people");
     test "parse SELECT multiple"
       (Select
          {
            table_name = "people";
-           cols =
+           col_names =
              [
                "first_name:string";
                "last_name:string";
@@ -69,6 +69,7 @@ let parse_tests =
       (SelectWhere
          {
            table_name = "students";
+           col_names = [ "id"; "student_id"; "grad_year" ];
            cond = { left = "grade"; op = EQ; right = "A" };
          })
       (parse "SELECT FROM students WHERE grade = A");
@@ -80,10 +81,10 @@ let parse_tests =
            table_name = "people";
            cols =
              [
-               "first_name:string";
-               "last_name:string";
-               "age:int";
-               "grade:string";
+               ("first_name", STRING);
+               ("last_name", STRING);
+               ("age", INT);
+               ("grade", STRING);
              ];
            vals = [ "henry"; "williams"; "24"; "A+" ];
          })
@@ -299,10 +300,10 @@ let select_insert_tests =
       @ [ [ "jenna"; "parker"; "19"; "B+" ] ])
       (insert "create"
          [
-           "first_name:string";
-           "last_name:string";
-           "age:int";
-           "grade:string";
+           ("first_name", STRING);
+           ("last_name", STRING);
+           ("age", INT);
+           ("grade", STRING);
          ]
          [ "jenna"; "parker"; "19"; "B+" ]);
   ]

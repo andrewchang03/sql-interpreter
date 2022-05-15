@@ -1,3 +1,3 @@
 (executable
  (name main)
- (libraries Database ANSITerminal graphics))
+ (libraries Database ANSITerminal))
