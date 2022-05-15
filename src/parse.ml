@@ -46,26 +46,6 @@ type insert_phrase = {
   vals : string list;
 }
 
-(* ALTER TABLE table_name ADD col_name data_type *)
-type alter_phrase = {
-  table_name : string;
-  alt_type : alter_type;
-  col_name : string;
-  col_type : data_type;
-}
-
-(* SELECT col1 col2 ... FROM table_name *)
-type select_phrase = {
-  table_name : string;
-  cols : string list;
-}
-
-(* SELECT FROM table_name WHERE cond *)
-type select_where_phrase = {
-  table_name : string;
-  cond : condition;
-}
-
 (* SELECT col1 col2 ... FROM table_name *)
 type select_phrase = {
   table_name : string;

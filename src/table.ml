@@ -56,19 +56,17 @@ let drop_table (tables : (string * Csv.t) list) (table_name : string) :
 
 let insert
     (table_name : string)
-    (col_names : string list)
+    (cols : (string * data_type) list)
     (vals : string list) : Csv.t =
   let table =
     Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
   in
-  if List.nth table 0 <> col_names then
-    failwith "column names do not match"
-  else begin
-    Csv.save
-      ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-      (table @ [ vals ]);
-    table @ [ vals ]
-  end
+  (* if List.nth table 0 <> cols then failwith "column names do not
+     match" *)
+  Csv.save
+    ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+    (table @ [ vals ]);
+  table @ [ vals ]
 
 (* ALTER TABLE ADD *)
 let rec add_empty_cols (data : string list list) : string list list =

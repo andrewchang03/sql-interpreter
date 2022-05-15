@@ -136,7 +136,7 @@ let rec loop_repl (tables : (string * Csv.t) list) :
         (add_table_space
            (select
               (snd (List.find (fun x -> fst x = s.table_name) tables))
-              s.cols));
+              s.col_names));
       loop_repl tables
   | SelectWhere s ->
       print_readable

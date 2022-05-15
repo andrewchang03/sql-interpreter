@@ -35,7 +35,8 @@ val drop_table :
 (** [drop_table tables name] deletes the table with [name] from
     [tables]. *)
 
-val insert : string -> string list -> string list -> Csv.t
+val insert :
+  string -> (string * Parse.data_type) list -> string list -> Csv.t
 (** [insert t c v] is the table [t] with a new row with values [v] in
     the respective columns [c] inserted at the beginning of the table.
     Precondition: every row is input in order, missing values nan. *)
