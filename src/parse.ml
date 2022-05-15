@@ -42,7 +42,7 @@ type condition = {
 (* INSERT INTO table_name col1 col2 ... VALUES val1 val2 ... *)
 type insert_phrase = {
   table_name : string;
-  cols : string list;
+  cols : (string * data_type) list;
   vals : string list;
 }
 
@@ -75,7 +75,7 @@ type select_phrase = {
 (* SELECT col1 col2 ... FROM table_name WHERE condition *)
 type select_where_phrase = {
   table_name : string;
-  col_names : string list; (* [col1; col2; ...] *)
+  col_names : string list; (*[col1; col2; ...]*)
   cond : condition;
 }
 
@@ -249,7 +249,7 @@ let parse_insert (t_name : string) (lst : string list) : insert_phrase =
 let parse_update (t_name : string) (lst : string list) : update_phrase =
   {
     table_name = t_name;
-    col_names = get_items_before lst "VALUES";
+    cols = get_items_before lst "VALUES";
     vals = get_items_between lst "VALUES" "WHERE";
     cond = parse_condition (get_items_after lst "WHERE");
   }
@@ -283,12 +283,12 @@ let rec parse_from_table (lst : string list) : string =
 let parse_select (lst : string list) : select_phrase =
   {
     table_name = parse_from_table lst;
-    cols = get_items_before lst "FROM";
+    col_names = get_items_before lst "FROM";
   }
 
 let parse_select_where (table_name : string) (cond_lst : string list) :
     select_where_phrase =
-  { table_name; cond = parse_condition cond_lst }
+  { table_name; col_names = []; cond = parse_condition cond_lst }
 
 let parse_create (table_name : string) (cols : string list) :
     create_phrase =
@@ -326,7 +326,7 @@ let parse_alter
 
 let parse_insert (table_name : string) (lst : string list) :
     insert_phrase =
-  let cols = get_items_before lst "VALUES" in
+  let cols = get_items_before lst "VALUES" |> parse_cols in
   let vals = get_items_after lst "VALUES" in
   if List.length cols <> List.length vals then raise Malformed
   else { table_name; cols; vals }
@@ -365,10 +365,6 @@ let parse (str : string) : command =
   | [ "DROP"; "TABLE"; t ] -> DropTable t
   | [ "ALTER"; "TABLE"; table_name; alter_type; col_name; col_type ] ->
       AlterTable (parse_alter table_name alter_type col_name col_type)
-  | [ "SELECT"; "ALL"; t ] -> SelectAll t
-  | "SELECT" :: t when List.mem "WHERE" t ->
-      SelectWhere (parse_select_where t)
-  | "SELECT" :: t -> Select (parse_select t)
   | "INSERT" :: "INTO" :: table_name :: t ->
       InsertInto (parse_insert table_name t)
   | "UPDATE" :: table_name :: t -> Update (parse_update table_name t)
