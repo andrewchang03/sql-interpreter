@@ -14,6 +14,7 @@ let supported_queries =
     "ALTER TABLE ADD";
     "DELETE FROM";
     "UPDATE";
+    "AGGREGATE INT FROM";
   ]
 
 let help =
@@ -47,6 +48,8 @@ let queries_help =
     "[UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE \
      condition] updates values under col1 and col2 that match \
      condition with val1 val2 ...";
+    "[AGGREGATE INT FROM table_name col_name aggregate_type] \
+     accumulates over a specified column.";
     "condition is the format of column_name operator value, and \
      operators can be >, >=, <, <=, =";
   ]
@@ -68,11 +71,11 @@ let add_space s =
 
 (* remove_space across the whole table *)
 let remove_table_space (table : Csv.t) : Csv.t =
-  List.map (fun x -> List.map remove_space x) table
+  table |> List.map (fun x -> List.map remove_space x)
 
 (* add_space across the whole table *)
 let add_table_space (table : Csv.t) : Csv.t =
-  List.map (fun x -> List.map add_space x) table
+  table |> List.map (fun x -> List.map add_space x)
 
 (* for updating table within the repl when the file updates, removes
    table in tables with name = name. *)
@@ -205,6 +208,11 @@ let rec loop_repl (tables : (string * Csv.t) list) :
           :: tables)
       with Malformed -> loop_repl tables
     end
+  | AggInt a ->
+      print_int
+        (aggregate_int_columns tables a.table_name a.col_name a.agg_type);
+      print_newline ();
+      loop_repl tables
   | exception NoTable ->
       print_string
         "This table does not exist in the database. Please try again.";

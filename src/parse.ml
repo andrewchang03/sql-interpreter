@@ -22,6 +22,15 @@ type operator =
   | GE
   | UNSUPPORTED of string
 
+type aggregate_int =
+  | AVERAGE
+  | MEDIAN
+  | SUM
+  | PRODUCT
+  | MIN
+  | MAX
+  | COUNT
+
 (* left op right *)
 type condition = {
   left : string;
@@ -79,6 +88,12 @@ type create_phrase = {
   cols : (string * data_type) list;
 }
 
+type aggregate_int_phrase = {
+  table_name : string;
+  col_name : string;
+  agg_type : aggregate_int;
+}
+
 (* TYPE OF COMMANDS *)
 
 type command =
@@ -91,6 +106,7 @@ type command =
   | InsertInto of insert_phrase
   | Update of update_phrase
   | Delete of delete_phrase
+  | AggInt of aggregate_int_phrase
   | LoadTable of string
   | DisplayTable of string
   | ListTables
@@ -289,5 +305,24 @@ let parse (str : string) : command =
   | "UPDATE" :: table_name :: t -> Update (parse_update table_name t)
   | "DELETE" :: "FROM" :: table_name :: "WHERE" :: t ->
       Delete (parse_delete table_name t)
+  | "AGGREGATE"
+    :: "INT" :: "FROM" :: table_name :: col_name :: agg_type :: t ->
+      AggInt
+        {
+          table_name;
+          col_name;
+          agg_type =
+            begin
+              match agg_type with
+              | "average" -> AVERAGE
+              | "median" -> MEDIAN
+              | "sum" -> SUM
+              | "product" -> PRODUCT
+              | "min" -> MIN
+              | "max" -> MAX
+              | "count" -> COUNT
+              | _ -> raise Malformed
+            end;
+        }
   | [] -> raise Empty
   | _ -> raise Malformed

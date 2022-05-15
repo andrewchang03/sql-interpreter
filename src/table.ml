@@ -345,3 +345,43 @@ let update_table
     ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
     (update_helper table cols vals update_rows 0);
   update_helper table cols vals update_rows 0
+
+let aggregate_int_columns
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : aggregate_int) : int =
+  let table = List.find (fun x -> fst x = table_name) tables |> snd in
+  let transposed = transpose_table table 0 in
+  let filtered =
+    List.filter (fun x -> List.nth x 0 = col_name) transposed
+    |> List.flatten
+  in
+  let mapped =
+    match filtered with
+    | [] -> failwith "Something is wrong with your table."
+    | h :: t -> List.map (fun x -> int_of_string x) t
+  in
+  match op with
+  | AVERAGE -> List.fold_left ( + ) 0 mapped / List.length mapped
+  | MEDIAN ->
+      if List.length mapped mod 2 = 0 then
+        List.nth
+          (List.sort (fun x y -> x - y) mapped)
+          (List.length mapped / 2)
+      else
+        List.nth
+          (List.sort (fun x y -> x - y) mapped)
+          (List.length mapped / 2)
+        + List.nth
+            (List.sort (fun x y -> x - y) mapped)
+            ((List.length mapped / 2) + 1)
+        |> ( / ) 2
+  | SUM -> List.fold_left ( + ) 0 mapped
+  | PRODUCT -> List.fold_left ( * ) 1 mapped
+  | MIN -> List.nth (List.sort (fun x y -> x - y) mapped) 0
+  | MAX ->
+      List.nth
+        (List.sort (fun x y -> x - y) mapped)
+        (List.length mapped - 1)
+  | COUNT -> List.length mapped

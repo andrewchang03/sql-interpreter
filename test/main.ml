@@ -30,7 +30,7 @@ let test
   test_name >:: fun _ -> assert_equal expected_output actual_output
 
 (* format for testing functions that return exceptions *)
-let test_exn
+let test_exceptions
     (test_name : string)
     (expected_output : exn)
     (actual_output : unit -> 'a) : test =
@@ -169,33 +169,43 @@ let parse_tests =
           Alexander_Hamilton");
   ]
 
-let parse_exns =
+let parse_exceptions =
   [
-    test_exn "parse Empty" Empty (fun () -> parse " ");
-    test_exn "unknown command" Malformed (fun () -> parse "view table");
-    test_exn "wrong select all" Malformed (fun () -> parse "SELECT_ALL");
-    test_exn "DROP TABLE missing table" Malformed (fun () ->
+    test_exceptions "parse Empty" Empty (fun () -> parse " ");
+    test_exceptions "unknown command" Malformed (fun () ->
+        parse "view table");
+    test_exceptions "wrong select all" Malformed (fun () ->
+        parse "SELECT_ALL");
+    test_exceptions "DROP TABLE missing table" Malformed (fun () ->
         parse "DROP TABLE");
-    test_exn "parse SELECT Malformed, no table name" Malformed
+    test_exceptions "parse SELECT Malformed, no table name" Malformed
       (fun () -> parse "SELECT column1 column2 FROM");
-    test_exn "parse INSERT INTO, no values" Malformed (fun () ->
+    test_exceptions "parse INSERT INTO, no values" Malformed (fun () ->
         parse "INSERT INTO table name age grade VALUES");
-    test_exn "DELETE TABLE missing table name" Malformed (fun () ->
-        parse "DELETE FROM WHERE CustomerName = Albert");
-    test_exn "DELETE TABLE no WHERE" Malformed (fun () ->
+    test_exceptions "DELETE TABLE missing table name" Malformed
+      (fun () -> parse "DELETE FROM WHERE CustomerName = Albert");
+    test_exceptions "DELETE TABLE no WHERE" Malformed (fun () ->
         parse "DELETE FROM table_name CustomerName = Albert");
-    test_exn "DELETE TABLE no condition" Malformed (fun () ->
+    test_exceptions "DELETE TABLE no condition" Malformed (fun () ->
         parse "DELETE FROM table_name WHERE");
-    test_exn "ALTER TABLE no data type" Malformed (fun () ->
+    test_exceptions "ALTER TABLE no data type" Malformed (fun () ->
         parse "ALTER TABLE people ADD age");
-    test_exn "ALTER TABLE no table name" Malformed (fun () ->
+    test_exceptions "ALTER TABLE no table name" Malformed (fun () ->
         parse "ALTER TABLE ADD age int");
-    test_exn "ALTER TABLE no operation specification ADD" Malformed
-      (fun () -> parse "ALTER TABLE table_name age int");
+    test_exceptions "ALTER TABLE no operation specification ADD"
+      Malformed (fun () -> parse "ALTER TABLE table_name age int");
+    test_exceptions "SELECT from empty table, returns failure"
+      (Stdlib.Failure "nth") (fun () -> select [] []);
+    test_exceptions "AGGREGATE STRING FROM" Malformed (fun () ->
+        parse "AGGREGATE STRING FROM sample age:int average");
+    test_exceptions "AGGREGATE FORGOT FROM" Malformed (fun () ->
+        parse "AGGREGATE INT sample age:int average");
+    test_exceptions "AGGREGATE FORGOT operation type" Malformed
+      (fun () -> parse "AGGREGATE INT sample age:int");
   ]
 
 (* Table operations tests *)
-let query_tests =
+let create_drop_tests =
   [
     test "CREATE TABLE file creation with columns"
       (let _ =
@@ -218,6 +228,20 @@ let query_tests =
            ("age", INT);
            ("grade", STRING);
          ]);
+    test "DROP TABLE"
+      [ ("table1", [ [ "col1" ] ]); ("table3", [ [ "col1" ] ]) ]
+      (drop_table
+         [
+           ("table1", [ [ "col1" ] ]);
+           ("table2", [ [ "col1" ] ]);
+           ("table3", [ [ "col1" ] ]);
+         ]
+         "table2");
+    test "DROP TABLE from empty" [] (drop_table [] "table_name");
+  ]
+
+let select_insert_tests =
+  [
     test "SELECT columns"
       [
         [ "name:string"; "age:int" ];
@@ -230,6 +254,30 @@ let query_tests =
          Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
        in
        select table [ "name:string"; "age:int" ]);
+    test "SELECT FROM WHERE"
+      (Csv.load
+         ("data" ^ Filename.dir_sep ^ "select_where_compare" ^ ".csv"))
+      (let _ =
+         Csv.save "delete_copy"
+           (Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv"))
+       in
+       select_where_table
+         [
+           ( "select_where",
+             Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv") );
+         ]
+         "select_where" "name:string" EQ "cornell");
+    test "SELECT ALL from a table"
+      (Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv"))
+      (select_all
+         [
+           ( "sample",
+             Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv") );
+           ( "sample2",
+             Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv") );
+           ("sample3", []);
+         ]
+         "sample");
     test "INSERT INTO one"
       (Csv.load ("data" ^ Filename.dir_sep ^ "create_compare" ^ ".csv")
       @ [ [ "jenna"; "parker"; "19"; "B+" ] ])
@@ -243,8 +291,101 @@ let query_tests =
          [ "jenna"; "parker"; "19"; "B+" ]);
   ]
 
+let conditional_query_tests =
+  [
+    test "ALTER TABLE"
+      (Csv.load ("data" ^ Filename.dir_sep ^ "alter_compare" ^ ".csv"))
+      (let _ =
+         Csv.save "alter_copy"
+           (Csv.load ("data" ^ Filename.dir_sep ^ "alter" ^ ".csv"))
+       in
+       let _ =
+         alter_table_add
+           [
+             ( "alter_copy",
+               Csv.load ("data" ^ Filename.dir_sep ^ "alter" ^ ".csv")
+             );
+           ]
+           "alter_copy" "new" STRING
+       in
+       Csv.load ("data" ^ Filename.dir_sep ^ "alter_copy" ^ ".csv"));
+    test "DELETE FROM"
+      (Csv.load ("data" ^ Filename.dir_sep ^ "delete_compare" ^ ".csv"))
+      (let _ =
+         Csv.save "delete_copy"
+           (Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv"))
+       in
+       let _ =
+         delete_table
+           [
+             ( "delete_copy",
+               Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv")
+             );
+           ]
+           "delete_copy" "age:int" LESS "25"
+       in
+       Csv.load ("data" ^ Filename.dir_sep ^ "delete_copy" ^ ".csv"));
+    test "UPDATE"
+      (Csv.load ("data" ^ Filename.dir_sep ^ "update_compare" ^ ".csv"))
+      (let _ =
+         Csv.save "update_copy"
+           (Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv"))
+       in
+       let _ =
+         update_table
+           [
+             ( "update_copy",
+               Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
+             );
+           ]
+           "update_copy"
+           [ "id:int"; "name:string"; "age:int" ]
+           [ "10"; "josephine"; "27" ]
+           "name:string" EQ "cornell"
+       in
+       Csv.load ("data" ^ Filename.dir_sep ^ "update_copy" ^ ".csv"));
+  ]
+
+let sample = Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
+
+let aggregate_int_tests =
+  [
+    test "AGGREGATE INT COUNT" 4
+      (aggregate_int_columns
+         [ ("sample", sample) ]
+         "sample" "age:int" COUNT);
+    test "AGGREGATE INT AVERAGE" 41
+      (aggregate_int_columns
+         [ ("sample", sample) ]
+         "sample" "age:int" AVERAGE);
+    test "AGGREGATE INT SUM" 165
+      (aggregate_int_columns
+         [ ("sample", sample) ]
+         "sample" "age:int" SUM);
+    test "AGGREGATE INT PRODUCT" 900000
+      (aggregate_int_columns
+         [ ("sample", sample) ]
+         "sample" "age:int" PRODUCT);
+    test "AGGREGATE INT MIN" 15
+      (aggregate_int_columns
+         [ ("sample", sample) ]
+         "sample" "age:int" MIN);
+    test "AGGREGATE INT MAX" 100
+      (aggregate_int_columns
+         [ ("sample", sample) ]
+         "sample" "age:int" MAX);
+  ]
+
 let suite =
   "Test suites"
-  >::: List.flatten [ parse_tests; parse_exns; query_tests ]
+  >::: List.flatten
+         [
+           parse_tests;
+           parse_exceptions;
+           create_drop_tests;
+           select_insert_tests;
+           conditional_query_tests;
+           aggregate_int_tests;
+         ]
 
 let _ = run_test_tt_main suite

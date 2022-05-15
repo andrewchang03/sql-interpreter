@@ -93,3 +93,9 @@ val update_table :
   Csv.t
 (** [update_table tables table_name cols vals left op right] updates the
     entries in [table_name] where condition satisfies. *)
+
+val aggregate_int_columns :
+  (string * Csv.t) list -> string -> string -> aggregate_int -> int
+(** [aggregate_int_columns tables table_name col_name op] finds
+    according column in a table and performs accumulator operations on
+    it. *)

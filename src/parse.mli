@@ -26,6 +26,16 @@ type operator =
   | GE
   | UNSUPPORTED of string
 
+(** [aggregate_int] provides variant operations for integer columns *)
+type aggregate_int =
+  | AVERAGE
+  | MEDIAN
+  | SUM
+  | PRODUCT
+  | MIN
+  | MAX
+  | COUNT
+
 type condition = {
   left : string;
   op : operator;
@@ -80,6 +90,14 @@ type create_phrase = {
 }
 (** [create_phrase] provides the AST for CREATE TABLE queries *)
 
+type aggregate_int_phrase = {
+  table_name : string;
+  col_name : string;
+  agg_type : aggregate_int;
+}
+(** [aggregate_int_phrase] provides the AST for aggregate operations on
+    columns holding integer data *)
+
 (** [command] provides a series of command or query variants *)
 type command =
   | CreateTable of create_phrase
@@ -91,6 +109,7 @@ type command =
   | InsertInto of insert_phrase
   | Update of update_phrase
   | Delete of delete_phrase
+  | AggInt of aggregate_int_phrase
   | LoadTable of string
   | DisplayTable of string
   | ListTables
