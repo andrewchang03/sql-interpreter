@@ -1,0 +1,5 @@
+id:int,name:string,age:int,deans:bool
+1,michael,15,true
+5,robert,30,false
+3,cornell,100,false
+4,mesut,20,true

@@ -385,3 +385,58 @@ let aggregate_int_columns
         (List.sort (fun x y -> x - y) mapped)
         (List.length mapped - 1)
   | COUNT -> List.length mapped
+
+let aggregate_string_columns
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : aggregate_string) : string =
+  let table = List.find (fun x -> fst x = table_name) tables |> snd in
+  let transposed = transpose_table table 0 in
+  let filtered =
+    List.filter (fun x -> List.nth x 0 = col_name) transposed
+    |> List.flatten
+  in
+  let no_head =
+    match filtered with
+    | [] -> failwith "Something is wrong with your table."
+    | h :: t -> t
+  in
+  match op with
+  | CONCAT -> String.concat ", " no_head
+  | CHARACTER_COUNT ->
+      string_of_int
+        (List.fold_left ( + ) 0
+           (List.map (fun x -> String.length x) no_head))
+  | WORD_COUNT -> string_of_int (List.length no_head)
+
+let aggregate_boolean_columns
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : aggregate_boolean) : string =
+  let table = List.find (fun x -> fst x = table_name) tables |> snd in
+  let transposed = transpose_table table 0 in
+  let filtered =
+    List.filter (fun x -> List.nth x 0 = col_name) transposed
+    |> List.flatten
+  in
+  let mapped =
+    match filtered with
+    | [] -> failwith "Something is wrong with your table."
+    | h :: t -> List.map (fun x -> bool_of_string x) t
+  in
+  match op with
+  | AND -> string_of_bool (List.fold_left ( && ) true mapped)
+  | OR -> string_of_bool (List.fold_left ( || ) false mapped)
+  | NAND ->
+      string_of_bool
+        (List.fold_left (fun x y -> not (x && y)) true mapped)
+  | NOR ->
+      string_of_bool
+        (List.fold_left (fun x y -> not (x || y)) false mapped)
+  | XOR ->
+      string_of_bool
+        (List.fold_left
+           (fun x y -> (not (x && y)) || (x && y) |> not)
+           true mapped)

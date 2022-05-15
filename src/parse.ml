@@ -31,6 +31,18 @@ type aggregate_int =
   | MAX
   | COUNT
 
+type aggregate_string =
+  | CONCAT
+  | CHARACTER_COUNT
+  | WORD_COUNT
+
+type aggregate_boolean =
+  | AND
+  | NAND
+  | OR
+  | NOR
+  | XOR
+
 (* left op right *)
 type condition = {
   left : string;
@@ -94,6 +106,18 @@ type aggregate_int_phrase = {
   agg_type : aggregate_int;
 }
 
+type aggregate_string_phrase = {
+  table_name : string;
+  col_name : string;
+  agg_type : aggregate_string;
+}
+
+type aggregate_bool_phrase = {
+  table_name : string;
+  col_name : string;
+  agg_type : aggregate_boolean;
+}
+
 (* TYPE OF COMMANDS *)
 
 type command =
@@ -107,6 +131,8 @@ type command =
   | Update of update_phrase
   | Delete of delete_phrase
   | AggInt of aggregate_int_phrase
+  | AggString of aggregate_string_phrase
+  | AggBool of aggregate_bool_phrase
   | LoadTable of string
   | DisplayTable of string
   | ListTables
@@ -321,6 +347,38 @@ let parse (str : string) : command =
               | "min" -> MIN
               | "max" -> MAX
               | "count" -> COUNT
+              | _ -> raise Malformed
+            end;
+        }
+  | "AGGREGATE"
+    :: "STRING" :: "FROM" :: table_name :: col_name :: agg_type :: t ->
+      AggString
+        {
+          table_name;
+          col_name;
+          agg_type =
+            begin
+              match agg_type with
+              | "concat" -> CONCAT
+              | "charcount" -> CHARACTER_COUNT
+              | "wordcount" -> WORD_COUNT
+              | _ -> raise Malformed
+            end;
+        }
+  | "AGGREGATE"
+    :: "BOOLEAN" :: "FROM" :: table_name :: col_name :: agg_type :: t ->
+      AggBool
+        {
+          table_name;
+          col_name;
+          agg_type =
+            begin
+              match agg_type with
+              | "and" -> AND
+              | "nand" -> NAND
+              | "or" -> OR
+              | "nor" -> NOR
+              | "xor" -> XOR
               | _ -> raise Malformed
             end;
         }

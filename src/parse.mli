@@ -36,6 +36,21 @@ type aggregate_int =
   | MAX
   | COUNT
 
+(** [aggregate_string] provides the variant operations for string
+    columns *)
+type aggregate_string =
+  | CONCAT
+  | CHARACTER_COUNT
+  | WORD_COUNT
+
+(** [aggregate_boolean] provides the variant operations for bool columns *)
+type aggregate_boolean =
+  | AND
+  | NAND
+  | OR
+  | NOR
+  | XOR
+
 type condition = {
   left : string;
   op : operator;
@@ -98,6 +113,22 @@ type aggregate_int_phrase = {
 (** [aggregate_int_phrase] provides the AST for aggregate operations on
     columns holding integer data *)
 
+type aggregate_string_phrase = {
+  table_name : string;
+  col_name : string;
+  agg_type : aggregate_string;
+}
+(** [aggregate_string_phrase] provides the AST for aggregate operations
+    on columns holding string data *)
+
+type aggregate_bool_phrase = {
+  table_name : string;
+  col_name : string;
+  agg_type : aggregate_boolean;
+}
+(** [aggregate_bool_phrase] provides the AST for aggregate operations on
+    columns holding boolean data *)
+
 (** [command] provides a series of command or query variants *)
 type command =
   | CreateTable of create_phrase
@@ -110,6 +141,8 @@ type command =
   | Update of update_phrase
   | Delete of delete_phrase
   | AggInt of aggregate_int_phrase
+  | AggString of aggregate_string_phrase
+  | AggBool of aggregate_bool_phrase
   | LoadTable of string
   | DisplayTable of string
   | ListTables

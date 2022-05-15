@@ -97,5 +97,25 @@ val update_table :
 val aggregate_int_columns :
   (string * Csv.t) list -> string -> string -> aggregate_int -> int
 (** [aggregate_int_columns tables table_name col_name op] finds
-    according column in a table and performs accumulator operations on
-    it. *)
+    according integer column in a table and performs integer accumulator
+    operations on it. *)
+
+val aggregate_string_columns :
+  (string * Csv.t) list ->
+  string ->
+  string ->
+  aggregate_string ->
+  string
+(** [aggregate_string_columns tables table_name col_name op] finds
+    according string column in a table and performs string accumulator
+    operations on it. *)
+
+val aggregate_boolean_columns :
+  (string * Csv.t) list ->
+  string ->
+  string ->
+  aggregate_boolean ->
+  string
+(** [aggregate_boolean_columns tables table_name col_name op] finds
+    according boolean column in a table and performs boolean accumulator
+    operations on it. *)

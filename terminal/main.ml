@@ -15,6 +15,8 @@ let supported_queries =
     "DELETE FROM";
     "UPDATE";
     "AGGREGATE INT FROM";
+    "AGGREGATE STRING FROM";
+    "AGGREGATE BOOLEAN FROM";
   ]
 
 let help =
@@ -48,8 +50,8 @@ let queries_help =
     "[UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE \
      condition] updates values under col1 and col2 that match \
      condition with val1 val2 ...";
-    "[AGGREGATE INT FROM table_name col_name aggregate_type] \
-     accumulates over a specified column.";
+    "[AGGREGATE INT / STRING / BOOLEAN FROM table_name col_name \
+     aggregate_type] accumulates over a specified column.";
     "condition is the format of column_name operator value, and \
      operators can be >, >=, <, <=, =";
   ]
@@ -211,6 +213,18 @@ let rec loop_repl (tables : (string * Csv.t) list) :
   | AggInt a ->
       print_int
         (aggregate_int_columns tables a.table_name a.col_name a.agg_type);
+      print_newline ();
+      loop_repl tables
+  | AggString a ->
+      print_string
+        (aggregate_string_columns tables a.table_name a.col_name
+           a.agg_type);
+      print_newline ();
+      loop_repl tables
+  | AggBool a ->
+      print_string
+        (aggregate_boolean_columns tables a.table_name a.col_name
+           a.agg_type);
       print_newline ();
       loop_repl tables
   | exception NoTable ->

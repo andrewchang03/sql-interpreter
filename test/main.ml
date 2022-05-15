@@ -348,6 +348,9 @@ let conditional_query_tests =
 
 let sample = Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
 
+let agg_sample =
+  Csv.load ("data" ^ Filename.dir_sep ^ "agg_sample" ^ ".csv")
+
 let aggregate_int_tests =
   [
     test "AGGREGATE INT COUNT" 4
@@ -374,6 +377,38 @@ let aggregate_int_tests =
       (aggregate_int_columns
          [ ("sample", sample) ]
          "sample" "age:int" MAX);
+    test "AGGREGATE STRING CONCAT" "michael, robert, cornell, mesut"
+      (aggregate_string_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "name:string" CONCAT);
+    test "AGGREGATE STRING CHARACTER_COUNT" "25"
+      (aggregate_string_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "name:string" CHARACTER_COUNT);
+    test "AGGREGATE STRING WORD_COUNT" "4"
+      (aggregate_string_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "name:string" WORD_COUNT);
+    test "AGGREGATE BOOLEAN AND" "false"
+      (aggregate_boolean_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "deans:bool" AND);
+    test "AGGREGATE BOOLEAN NAND" "false"
+      (aggregate_boolean_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "deans:bool" NAND);
+    test "AGGREGATE BOOLEAN OR" "true"
+      (aggregate_boolean_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "deans:bool" OR);
+    test "AGGREGATE BOOLEAN NOR" "false"
+      (aggregate_boolean_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "deans:bool" NOR);
+    test "AGGREGATE BOOLEAN XOR" "false"
+      (aggregate_boolean_columns
+         [ ("agg_sample", agg_sample) ]
+         "agg_sample" "deans:bool" XOR);
   ]
 
 let suite =
