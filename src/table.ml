@@ -294,14 +294,11 @@ let rec select_where_helper
       else select_where_helper t indices (counter + 1)
 
 let select_where_table
-    (tables : (string * Csv.t) list)
-    (table_name : string)
+    (* (tables : (string * Csv.t) list) *)
+      (table : Csv.t)
     (col_name : string)
     (op : operator)
     (value : string) : Csv.t =
-  let table =
-    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-  in
   let select_rows =
     where_find_col (transpose_table table 0) col_name op value
   in

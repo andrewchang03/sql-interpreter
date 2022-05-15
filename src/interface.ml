@@ -1,3 +1,6 @@
+open Table
+open Parse
+
 type direction =
   | LEFT
   | RIGHT
@@ -28,6 +31,7 @@ type state = {
   mutable level : level_selector;
   mutable name : name_selector;
   mutable select_pos : int;
+  mutable t : Csv.t;
 }
 
 let init_days : day_selector = { x = 100.; y = 400. }
@@ -77,7 +81,41 @@ let controller state action =
           else if state.select_pos == 3 && state.name.y < 400. then
             state.name.y <- state.name.y +. 50.
     end
-  | Enter -> raise (Failure "Unimplemented")
+  | Enter ->
+      let day_query =
+        let table =
+          Csv.load ("data" ^ Filename.dir_sep ^ "csvClasses" ^ ".csv")
+        in
+        if state.day.y == 300. then
+          Table.select_where_table table "time" EQ "Other"
+        else if state.day.y == 350. then
+          Table.select_where_table table "time" EQ "Tues/Thurs"
+        else Table.select_where_table table "time" EQ "Mon/Wed/Fri"
+      in
+      let level_query =
+        if state.level.y == 300. then
+          Table.select_where_table
+            (Table.select_where_table day_query "id" GE "5000")
+            "id" LESS "7000"
+        else if state.level.y == 350. then
+          Table.select_where_table
+            (Table.select_where_table day_query "id" GE "3000")
+            "id" LESS "5000"
+        else
+          Table.select_where_table
+            (Table.select_where_table day_query "id" GE "1000")
+            "id" LESS "3000"
+      in
+      let name_query =
+        if state.name.y == 300. then
+          Table.select_where_table level_query "name" GREATER "Q"
+        else if state.level.y == 350. then
+          Table.select_where_table
+            (Table.select_where_table level_query "name" GREATER "G")
+            "name" LESS "P"
+        else Table.select_where_table level_query "name" LESS "G"
+      in
+      state.t <- name_query
 
 let init () =
   {
@@ -85,6 +123,7 @@ let init () =
     level = init_level;
     name = init_name;
     select_pos = 1;
+    t = Csv.load ("data" ^ Filename.dir_sep ^ "csvClasses" ^ ".csv");
   }
 
 let render (state : state) =
@@ -98,9 +137,9 @@ let render (state : state) =
   drawString 100. 400. "Mon/Wed/Fri";
   drawString 100. 350. "Tues/Thurs";
   drawString 100. 300. "Other";
-  drawString 300. 400. "2000-2999";
-  drawString 300. 350. "3000-3999";
-  drawString 300. 300. "4000-4999";
+  drawString 300. 400. "1000-2999";
+  drawString 300. 350. "3000-4999";
+  drawString 300. 300. "5000-7999";
   drawString 500. 400. "A-F";
   drawString 500. 350. "G-P";
   drawString 500. 300. "Q-Z";

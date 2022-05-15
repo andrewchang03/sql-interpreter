@@ -140,8 +140,9 @@ let rec loop_repl (tables : (string * Csv.t) list) :
       loop_repl tables
   | SelectWhere s ->
       print_readable
-        (select_where_table tables s.table_name s.cond.left s.cond.op
-           s.cond.right);
+        (select_where_table
+           (snd (List.find (fun x -> fst x = s.table_name) tables))
+           s.cond.left s.cond.op s.cond.right);
       loop_repl tables
   | SelectAll s -> begin
       (* fully functional *)

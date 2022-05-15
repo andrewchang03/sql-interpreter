@@ -13,14 +13,14 @@ val select : Csv.t -> string list -> Csv.t
 (** [select table col_names] grabs columns in col_names from the table *)
 
 val select_where_table :
-  (string * Csv.t) list ->
-  string ->
+  (* (string * Csv.t) list -> *)
+  Csv.t ->
   string ->
   operator ->
   string ->
   Csv.t
-(** [select_where_table tables t c op v] grabs table entries that
-    satisfy the condition *)
+(** [select_where_table t c op v] grabs table entries that satisfy the
+    condition *)
 
 val select_all : (string * Csv.t) list -> string -> Csv.t
 (** [select_all tables table_name] returns the whole queried table *)

@@ -2,16 +2,21 @@ open Database
 open Interface
 
 let appController state keyToAction ~key ~x ~y =
-  match keyToAction ~key ~x ~y with
+  match keyToAction ~key with
   | Some action -> Interface.controller !state action
   | None -> ()
 
-let arrowKeys ~key ~x ~y =
+let arrowKeys ~key =
   match key with
   | Glut.KEY_LEFT -> Some (Interface.Move LEFT)
   | Glut.KEY_RIGHT -> Some (Interface.Move RIGHT)
   | Glut.KEY_UP -> Some (Interface.Move DOWN)
   | Glut.KEY_DOWN -> Some (Interface.Move UP)
+  | _ -> None
+
+let enterKey ~key =
+  match key with
+  | 13 -> Some Interface.Enter
   | _ -> None
 
 (* Declare rendering function, buffering mode, and create window *)
@@ -35,6 +40,7 @@ let initEngine ~state ~w ~h =
   initDisplay ~w ~h ~title:"Cornell CS Course Roster";
   initView ~w ~h;
   Glut.specialFunc ~cb:(appController state arrowKeys);
+  Glut.keyboardFunc ~cb:(appController state enterKey);
   Glut.displayFunc (fun () -> Interface.render !state);
   Glut.mainLoop
 
