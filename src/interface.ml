@@ -31,7 +31,7 @@ type state = {
   mutable level : level_selector;
   mutable name : name_selector;
   mutable select_pos : int;
-  mutable t : Csv.t;
+  mutable table : Csv.t;
 }
 
 let init_days : day_selector = { x = 100.; y = 400. }
@@ -53,6 +53,35 @@ let render_box x y color =
     [ (-10., -10.); (-10., 20.); (140., 20.); (140., -10.) ];
   GlDraw.color (255., 255., 255.);
   GlDraw.ends ()
+
+let rec rec_row x y color row =
+  match row with
+  | [] -> ()
+  | h :: t ->
+      drawString (80. +. (x *. 80.)) y h;
+      GlMat.translate3 (80., y -. 20., 0.);
+      GlDraw.color color;
+      GlDraw.begins `line_loop;
+      List.iter GlDraw.vertex2
+        [ (-10., 50.); (-10., 0.); (650., 0.); (650., 50.) ];
+      GlDraw.ends ();
+      rec_row (x +. 1.) y color t
+
+let rec render_rows pos y color rows =
+  match rows with
+  | [] -> ()
+  | h :: t ->
+      if pos <= 6. then (
+        rec_row 0. y color h;
+        render_rows (pos +. 1.) (250. -. (50. *. pos)) color t)
+      else ()
+
+let render_table color rows =
+  match List.nth_opt rows 0 with
+  | Some col ->
+      let num_rows = List.length rows |> float_of_int in
+      render_rows 1. 250. color rows
+  | None -> ()
 
 let controller state action =
   match action with
@@ -115,7 +144,7 @@ let controller state action =
             "name" LESS "P"
         else Table.select_where_table level_query "name" LESS "G"
       in
-      state.t <- name_query
+      state.table <- name_query
 
 let init () =
   {
@@ -123,7 +152,7 @@ let init () =
     level = init_level;
     name = init_name;
     select_pos = 1;
-    t = Csv.load ("data" ^ Filename.dir_sep ^ "csvClasses" ^ ".csv");
+    table = Csv.load ("data" ^ Filename.dir_sep ^ "csClasses" ^ ".csv");
   }
 
 let render (state : state) =
@@ -143,13 +172,15 @@ let render (state : state) =
   drawString 500. 400. "A-F";
   drawString 500. 350. "G-P";
   drawString 500. 300. "Q-Z";
-  if state.select_pos == 1 then
-    render_box state.day.x state.day.y (0., 255., 0.)
-  else render_box state.day.x state.day.y (255., 255., 255.);
+  let white = (255., 255., 255.) in
+  let green = (0., 255., 0.) in
+  render_table white state.table;
+  if state.select_pos == 1 then render_box state.day.x state.day.y green
+  else render_box state.day.x state.day.y white;
   if state.select_pos == 2 then
-    render_box state.level.x state.level.y (0., 255., 0.)
-  else render_box state.level.x state.level.y (255., 255., 255.);
+    render_box state.level.x state.level.y green
+  else render_box state.level.x state.level.y white;
   if state.select_pos == 3 then
-    render_box state.name.x state.name.y (0., 255., 0.)
-  else render_box state.name.x state.name.y (255., 255., 255.);
+    render_box state.name.x state.name.y green
+  else render_box state.name.x state.name.y white;
   Glut.swapBuffers ()

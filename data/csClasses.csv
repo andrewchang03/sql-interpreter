@@ -1,0 +1,209 @@
+id:int,name:string,time:string
+1109, Fundamental Programming Concepts
+1110, Introduction to Computing Using Python
+1112, Introduction to Computing Using MATLAB
+1132, Short Course in MATLAB
+1133, Short Course in Python
+1300, Introductory Design and Programming for the Web
+1340, Choices and Consequences in Computing
+1380, Data Science for All
+1610, Computing in the Arts
+1710, Introduction to Cognitive Science
+1998, Freshmen and Nontechnical Team Projects
+2024, C++ Programming
+2043, UNIX Tools and Scripting
+2110, Object-Oriented Programming and Data Structures
+2111, Programming Practicum
+2112, Object-Oriented Design and Data Structures - Honors
+2300, Intermediate Design and Programming for the Weba
+2382, Urban Analytics
+2770, Excursions in Computational Sustainability
+2800, Discrete Structures
+2802, Discrete Structures - Honors
+2850, Networks
+3110, Data Structures and Functional Programming
+3152, Introduction to Computer Game Architecture
+3220, Computational Mathematics for Computer Science
+3300, Data-Driven Web Applications
+3410, Computer System Organization and Programming
+3420, Embedded Systems
+3758, Autonomous Mobile Robots
+4090, Teaching Experience in Computer Science
+4110, Programming Languages and Logics
+4120, Introduction to Compilers
+4121, Practicum in Compilers
+4152, Advanced Topics in Computer Game Architecture
+4160, Formal Verification
+4210, Numerical Analysis and Differential Equations
+4220, Numerical Analysis Linear and Nonlinear Problems
+4300, Language and Information
+4320, Introduction to Database Systems
+4321, Practicum in Database Systems
+4410, Operating Systems
+4411, Practicum in Operating Systems
+4414, Systems Programming
+4420, Computer Architecture
+4450, Introduction to Computer Networks
+4620, Introduction to Computer Graphics
+4621, Computer Graphics Practicum
+4670, Introduction to Computer Vision
+4700, Foundations of Artificial Intelligence
+4701, Practicum in Artificial Intelligence
+4740, Natural Language Processing
+4744, Computational Linguistics I
+4750, Foundations of Robotics
+4754, Re-Designing Robots
+4758, Autonomous Mobile Robots
+4775, Computational Genetics and Genomics
+4780, Introduction to Machine Learning
+4783, Mathematical Foundations of Machine Learning
+4786, Machine Learning for Data Science
+4787, Principles of Large-Scale Machine Learning Systems
+4789, Introduction to Reinforcement Learning
+4810, Introduction to Theory of Computing
+4812, Quantum Information Processing
+4814, Introduction to Computational Complexity
+4820, Introduction to Analysis of Algorithms
+4830, Introduction to Cryptography
+4850, Mathematical Foundations for the Information Age
+4852, Networks II Market Design
+4860, Applied Logic
+4990, International Research Internship
+4997, Practical Training in Computer Science
+4998, Team Projects
+4999, Independent Reading and Research
+5094, Introduction to Blockchains Cryptocurrencies and Smart Contracts
+5110, Programming Languages and Logics
+5112, Algorithms and Data Structures for Applications
+5114, Software-Defined Networking
+5120, Introduction to Compilers
+5121, Practicum in Compilers
+5135, Computational Integer Programming
+5150, Software Engineering
+5152, Advanced Topics in Computer Game Architecture
+5154, Software Testing
+5160, Formal Verification
+5199, Competition Programming and Problem Solving Seminar
+5220, Applications of Parallel Computers
+5223, Numerical Analysis Linear and Nonlinear Problems
+5304, Data Science in the Wild
+5306, Crowdsourcing and Human Computation
+5320, Introduction to Database Systems
+5321, Practicum in Database Systems
+5356, Building Startup Systems
+5410, Operating Systems
+5411, Practicum in Operating Systems
+5412, Cloud Computing
+5414, Distributed Computing Principles
+5420, Advanced Computer Architecture
+5424, Developing and Designing Interactive Devices
+5430, System Security
+5431, Practicum in System Security
+5432, Advanced System Security
+5433, Blockchains Cryptocurrencies and Smart Contracts
+5435, Security and Privacy Concepts in the Wild
+5436, Privacy in the Digital Age
+5439, Practicum in Computer Security
+5450, Networked and Distributed Systems
+5620, Introduction to Computer Graphics
+5621, Computer Graphics Practicum
+5625, Interactive Computer Graphics
+5650, Virtual and Augmented Reality
+5660, Signal Processing
+5670, Introduction to Computer Vision
+5678, Topics in Mixed Reality
+5682, HCI and Design
+5700, Foundations of Artificial Intelligence
+5701, Practicum in Artificial Intelligence
+5726, Learning Inference and Decision Making from Data
+5727, Optimization Methods
+5740, Natural Language Processing
+5750, Foundations of Robotics
+5758, Autonomous Mobile Robots
+5780, Introduction to Machine Learning
+5781, Machine Learning Engineering
+5783, Mathematical Foundations of Machine Learning
+5785, Applied Machine Learning
+5786, Machine Learning for Data Science
+5787, Deep Learning
+5789, Introduction to Reinforcement Learning
+5820, Introduction to Analysis of Algorithms
+5830, Cryptography
+5831, Security Protocols and Privacy
+5846, Decision Theory I
+5850, Mathematical Foundations for the Information Age
+5854, Networks and Market
+5998, Master of Engineering Internship
+5999, Master of Engineering Project
+6110, Advanced Programming Languages
+6113, Language-Based Security
+6114, Software-Defined Networkin
+6115, Certified Software Systems
+6117, Category Theory for Computer Scientists
+6120, Advanced Compilers
+6156, Runtime Verification
+6172, Program Synthesis
+6180, Introduction to Constructive Type Theory
+6182, Foundations of Probabilistic Programming
+6210, Matrix Computations
+6220, Data-Sparse Matrix Computations
+6241, Numerical Methods for Data Science
+6320, Advanced Database Systems
+6360, Educational Technology
+6382, Data Science for Social Change
+6410, Advanced Systems CR
+6411, Systems Principles
+6431, Security and Privacy Technologies
+6450, Advanced Computer Networking
+6465, Emerging Cloud Technologies and Systems Challenges
+6466, Cryptocurrencies and Smart Contracts
+6480, Systems Software and Formal Methods
+6670, Computer Vision
+6682, Computation for Content Creation
+6700, Advanced Artificial Intelligence
+6740, Advanced Language Technologie
+6741, Topics in Natural Language Processing and Machine Learnin
+6742, Natural Language Processing and Social Interaction
+6751, Robot Manipulation
+6752, Formal Methods for Robotics
+6764, Reasoning about Knowledge
+6780, Advanced Machine Learning
+6781, Theoretical Foundations of Machine Learning
+6783, Machine Learning Theory
+6784, Advanced Topics in Machine Learning
+6785, Deep Probabilistic and Generative Models
+6787, Advanced Machine Learning Systems
+6788, Advanced Topic Modeling
+6789, Foundations of Reinforcement Learning
+6802, Lattices Geometry Cryptography and Algorithms
+6810, Theory of Computing
+6815, Pseudorandomness and Combinatorial Constructions
+6817, Special Topics in Complexity Theory
+6820, Analysis of Algorithms
+6840, Algorithmic Game Theory
+6850, The Structure of Information Networks
+6860, Logics of Programs
+6861, Introduction to Kleene Algebra
+7090, Computer Science Colloquium
+7190, Seminar in Programming Languages
+7194, Great Works in Programming Languages
+7290, Seminar on Scientific Computing and Numerics
+7390, Database Seminar
+7420, Special Topics in Computer Systems
+7450, Computer Networks a Decade from Now
+7490, Systems Research Seminar
+7491, The Great Instruction Set Architectures
+7492, Special Topics in Computer Systems
+7493, Compute
+7620, Special Topics in Computer Graphics
+7690, Computer Graphics and Vision Seminar
+7740, Special Topics in Natural Language Processing
+7790, Seminar in Artificial Intelligence
+7792, Special Topics in Machine Learning
+7794, Seminar in Natural Language Understandin
+7796, Robotics Seminar
+7822, Special Topics in Algorithms
+7850, Seminar on Information Networks
+7890, Seminar in Theory of Algorithms and Computing
+7893, Cryptography Seminar
+7999, Independent Research
