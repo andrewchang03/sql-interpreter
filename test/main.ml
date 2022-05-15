@@ -202,6 +202,22 @@ let parse_exceptions =
         parse "AGGREGATE INT sample age:int average");
     test_exceptions "AGGREGATE FORGOT operation type" Malformed
       (fun () -> parse "AGGREGATE INT sample age:int");
+    test_exceptions "CREATE TABLE wrong data type" Malformed (fun () ->
+        create_table "create2"
+          [
+            ("first_name", STRING);
+            ("last_name", STRING);
+            ("age", INT);
+            ("grade", UNSUPPORTED "");
+          ]);
+    test_exceptions "ALTER TABLE wrong data type" Malformed (fun () ->
+        alter_table_add
+          [
+            ( "alter_copy",
+              Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
+            );
+          ]
+          "alter_copy" "new" (UNSUPPORTED ""));
   ]
 
 (* Table operations tests *)
@@ -411,6 +427,30 @@ let aggregate_int_tests =
          "agg_sample" "deans:bool" XOR);
   ]
 
+let agg_exceptions =
+  [
+    test_exceptions "AGGREGATE INT SUM wrong data type as string"
+      (Stdlib.Failure "int_of_string") (fun () ->
+        aggregate_int_columns
+          [ ("sample", sample) ]
+          "sample" "name:string" SUM);
+    test_exceptions "AGGREGATE INT PRODUCT wrong data type as bool"
+      (Stdlib.Failure "int_of_string") (fun () ->
+        aggregate_int_columns
+          [ ("agg_sample", agg_sample) ]
+          "agg_sample" "deans:bool" PRODUCT);
+    test_exceptions "AGGREGATE BOOLEAN AND wrong data type as string"
+      (Stdlib.Invalid_argument "bool_of_string") (fun () ->
+        aggregate_boolean_columns
+          [ ("agg_sample", agg_sample) ]
+          "agg_sample" "name:string" AND);
+    test_exceptions "AGGREGATE BOOLEAN OR wrong data type as int"
+      (Stdlib.Invalid_argument "bool_of_string") (fun () ->
+        aggregate_boolean_columns
+          [ ("agg_sample", agg_sample) ]
+          "agg_sample" "age:int" OR);
+  ]
+
 let suite =
   "Test suites"
   >::: List.flatten
@@ -421,6 +461,7 @@ let suite =
            select_insert_tests;
            conditional_query_tests;
            aggregate_int_tests;
+           agg_exceptions;
          ]
 
 let _ = run_test_tt_main suite
