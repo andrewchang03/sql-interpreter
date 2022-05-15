@@ -51,41 +51,33 @@ let render_box x y color =
   GlDraw.color (255., 255., 255.);
   GlDraw.ends ()
 
-let rec rec_row x y row =
+let rec rec_row x y color row =
   match row with
   | [] -> ()
   | h :: t ->
-      drawString (100. +. (x *. 80.)) y h;
-      rec_row (x +. 1.) y t
+      drawString (80. +. (x *. 80.)) y h;
+      GlMat.translate3 (80., y -. 20., 0.);
+      GlDraw.color color;
+      GlDraw.begins `line_loop;
+      List.iter GlDraw.vertex2
+        [ (-10., 50.); (-10., 0.); (650., 0.); (650., 50.) ];
+      GlDraw.ends ();
+      rec_row (x +. 1.) y color t
 
-let rec render_rows pos y rows =
+let rec render_rows pos y color rows =
   match rows with
   | [] -> ()
   | h :: t ->
       if pos <= 6. then (
-        rec_row 0. y h;
-        render_rows (pos +. 1.) (250. -. (50. *. pos)) t)
+        rec_row 0. y color h;
+        render_rows (pos +. 1.) (250. -. (50. *. pos)) color t)
       else ()
 
-let render_table x y color rows =
+let render_table color rows =
   match List.nth_opt rows 0 with
   | Some col ->
       let num_rows = List.length rows |> float_of_int in
-      let num_col = List.length col |> float_of_int in
-      render_rows 1. 250. rows;
-      GlMat.load_identity ();
-      GlMat.translate3 (x, y, 0.);
-      GlDraw.color color;
-      GlDraw.begins `line_loop;
-      List.iter GlDraw.vertex2
-        [
-          (-10., 50. +. (40. *. num_rows));
-          (-10., 0.);
-          (50. +. (80. *. num_col), 0.);
-          (50. +. (80. *. num_col), 50. +. (40. *. num_rows));
-        ];
-      GlDraw.color (255., 255., 255.);
-      GlDraw.ends ()
+      render_rows 1. 250. color rows
   | None -> ()
 
 let controller state action =
@@ -123,11 +115,12 @@ let init () =
     level = init_level;
     name = init_name;
     select_pos = 1;
-    table = [ [ "row 1"; "row 2"; "row 3" ]; [ "row 2" ]; [ "row 3" ] ];
+    table = [];
   }
 
 let render (state : state) =
   GlClear.clear [ `color ];
+
   drawString 100. 530.
     "1. Use arrow keys to select your search options.";
   drawString 100. 500. "2. Press the enter key to submit the query.";
@@ -143,17 +136,16 @@ let render (state : state) =
   drawString 500. 400. "A-F";
   drawString 500. 350. "G-P";
   drawString 500. 300. "Q-Z";
+  let white = (255., 255., 255.) in
+  let green = (0., 255., 0.) in
   let num_rows = float_of_int (List.length state.table) in
-  render_table 100.
-    (40. +. (10. *. num_rows))
-    (255., 255., 255.) state.table;
-  if state.select_pos == 1 then
-    render_box state.day.x state.day.y (0., 255., 0.)
-  else render_box state.day.x state.day.y (255., 255., 255.);
+  render_table white state.table;
+  if state.select_pos == 1 then render_box state.day.x state.day.y green
+  else render_box state.day.x state.day.y white;
   if state.select_pos == 2 then
-    render_box state.level.x state.level.y (0., 255., 0.)
-  else render_box state.level.x state.level.y (255., 255., 255.);
+    render_box state.level.x state.level.y green
+  else render_box state.level.x state.level.y white;
   if state.select_pos == 3 then
-    render_box state.name.x state.name.y (0., 255., 0.)
-  else render_box state.name.x state.name.y (255., 255., 255.);
+    render_box state.name.x state.name.y green
+  else render_box state.name.x state.name.y white;
   Glut.swapBuffers ()
