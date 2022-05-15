@@ -1,15 +1,16 @@
 open Csv
-open Command
+open Parse
 
 type t = string list list
 
+(* transpose table to pop columns *)
 let rec transpose_table (table : Csv.t) (n : int) : Csv.t =
   if n = List.length (List.nth table 0) then []
   else
     List.map (fun x -> List.nth x n) table
     :: transpose_table table (n + 1)
 
-let select table (col_names : string list) =
+let rec select (table : Csv.t) (col_names : string list) : Csv.t =
   transpose_table
     (List.filter
        (fun x -> List.mem (List.nth x 0) col_names)
@@ -18,100 +19,78 @@ let select table (col_names : string list) =
 
 (** [select_all tables name] finds table [name] in collection of tables
     [tables] and returns it. *)
-let select_all tables name =
+let select_all (tables : (string * Csv.t) list) (name : string) =
   List.find (fun x -> fst x = name) tables |> snd
 
 (* CREATE TABLE *)
-let create_table fname (cols : (string * Command.data_type) list) =
-  let table =
-    [
-      List.map
-        (fun col ->
-          match col with
-          | name, dt -> (
-              name ^ " "
-              ^
-              match dt with
-              | BOOL -> "bool"
-              | INT -> "int"
-              | FLOAT -> "float"
-              | STRING -> "string"
-              | CHAR -> "char"
-              | UNSUPPORTED s -> raise Malformed))
-        cols;
-    ]
-  in
-  Csv.save ("data" ^ Filename.dir_sep ^ fname ^ ".csv") table;
-  table
+let create_table
+    (table_name : string)
+    (col_names : (string * Parse.data_type) list) : Csv.t =
+  if List.length col_names = 0 then []
+  else
+    let table =
+      [
+        List.map
+          (fun col ->
+            match col with
+            | name, dt -> (
+                name ^ ":"
+                ^
+                match dt with
+                | BOOL -> "bool"
+                | INT -> "int"
+                | FLOAT -> "float"
+                | STRING -> "string"
+                | CHAR -> "char"
+                | UNSUPPORTED s -> raise Malformed))
+          col_names;
+      ]
+    in
+    Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") table;
+    table
 
 (* DROP TABLE *)
-let drop_table tables name = List.filter (fun x -> fst x <> name) tables
+let drop_table (tables : (string * Csv.t) list) (table_name : string) :
+    (string * Csv.t) list =
+  List.filter (fun x -> fst x <> table_name) tables
 
-(* UPDATE TABLE *)
-
-let get_first_el (lis : string list) : string =
-  match lis with
-  | [] -> ""
-  | h :: t -> h
-
-let remove_one_el lis =
-  match lis with
-  | [] -> []
-  | h :: t -> t
-
-let rec update_helper acc (col : string list) (vals : 'a list) cond =
-  match vals with
-  | [] -> acc
-  | h :: t ->
-      if cond h then update_helper (h :: acc) (remove_one_el col) t cond
-      else
-        update_helper
-          (get_first_el col :: acc)
-          (remove_one_el vals) t cond
-
-let rec new_table acc (temp : 'a list) (col : 'a list) t =
-  match t with
-  | [] -> []
-  | h :: t ->
-      if h = col then new_table (acc @ [ temp ]) temp col t
-      else new_table (acc @ [ h ]) temp col t
-
-let update
-    (t : Csv.t)
-    (col : string list)
-    (vals : 'a list)
-    (cond : 'a -> bool) =
-  let temp = update_helper [] col vals cond in
-  new_table [] temp col t
-
-let update t cols vals cond =
-  raise (Stdlib.Failure "Unimplemented: update")
-
-let load_table fname =
-  Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
-
-let rec get_table (tables : (string * Csv.t) list) name =
-  match tables with
-  | [] -> []
-  | (n, d) :: t when n = name -> d
-  | _ :: t -> get_table t name
+let insert
+    (table_name : string)
+    (col_names : string list)
+    (vals : string list) : Csv.t =
+  let table =
+    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+  in
+  if List.nth table 0 <> col_names then
+    failwith "column names do not match"
+  else begin
+    Csv.save
+      ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+      (table @ [ vals ]);
+    table @ [ vals ]
+  end
 
 (* ALTER TABLE ADD *)
-let rec add_empty_cols (data : string list list) =
+let rec add_empty_cols (data : string list list) : string list list =
   match data with
   | [] -> []
-  | row :: tail -> ("" :: row) :: add_empty_cols tail
+  | row :: tail -> ("nan" :: row) :: add_empty_cols tail
 
-let is_duplicate_col (t : Csv.t) col =
+let is_duplicate_col (t : Csv.t) (col_names : string) : bool =
   match t with
-  | cols :: t -> List.exists (fun col_name -> col_name = col) cols
+  | columns :: t ->
+      List.exists (fun col_name -> col_name = col_names) columns
   | [] -> raise NoTable
 
-let alter_table_add_helper (t : Csv.t) name col col_type =
-  let result =
+let alter_table_add_helper
+    (t : Csv.t)
+    (table_name : string)
+    (col_name : string)
+    (col_type : data_type) : string list list =
+  let new_table =
     match t with
     | cols :: data ->
-        if not (is_duplicate_col t col) then
+        if not (is_duplicate_col t col_name) then
           let type_name =
             match col_type with
             | INT -> "int"
@@ -121,31 +100,47 @@ let alter_table_add_helper (t : Csv.t) name col col_type =
             | CHAR -> "char"
             | UNSUPPORTED s -> raise Malformed
           in
-          ((col ^ " " ^ type_name) :: cols) :: add_empty_cols data
-        else raise (DuplicateName col)
+          ((col_name ^ ":" ^ type_name) :: cols) :: add_empty_cols data
+        else raise (DuplicateName col_name)
     | [] -> raise NoTable
   in
-  Csv.save ("data" ^ Filename.dir_sep ^ name ^ ".csv") result;
-  result
+  Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") new_table;
+  new_table
 
-let rec alter_add_in_place tables name col col_type before =
+let rec alter_add_in_place
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (col_type : data_type)
+    (before : (string * Csv.t) list) : (string * Csv.t) list =
   match tables with
   | [] -> raise NoTable
-  | (n, d) :: t when n = name ->
-      before @ [ (n, alter_table_add_helper d name col col_type) ] @ t
-  | h :: t -> alter_add_in_place t name col col_type (before @ [ h ])
+  | (n, d) :: t when n = table_name ->
+      before
+      @ [ (n, alter_table_add_helper d table_name col_name col_type) ]
+      @ t
+  | h :: t ->
+      alter_add_in_place t table_name col_name col_type (before @ [ h ])
 
-let alter_table_add tables name col col_type =
+let alter_table_add
+    (tables : (string * Csv.t) list)
+    (name : string)
+    (col : string)
+    (col_type : data_type) : (string * Csv.t) list =
   alter_add_in_place tables name col col_type []
 
 (* ALTER TABLE DROP *)
-let rec drop_cols (data : string list list) =
+let rec drop_cols (data : string list list) : string list list =
   match data with
   | [] -> []
-  | row :: tail -> ("" :: row) :: drop_cols tail
+  | row :: tail -> ("nan" :: row) :: drop_cols tail
 
-let alter_table_drop_helper (t : Csv.t) name col col_type =
-  let result =
+let alter_table_drop_helper
+    (t : Csv.t)
+    (table_name : string)
+    (col_name : string)
+    (col_type : data_type) : Csv.t =
+  let new_table =
     match t with
     | cols :: t ->
         let type_name =
@@ -157,92 +152,291 @@ let alter_table_drop_helper (t : Csv.t) name col col_type =
           | CHAR -> "char"
           | UNSUPPORTED s -> raise Malformed
         in
-        List.filter (fun c -> c <> col ^ " " ^ type_name) cols
+        List.filter (fun c -> c <> col_name ^ ":" ^ type_name) cols
         :: drop_cols t
     | [] -> []
   in
-  Csv.save ("data" ^ Filename.dir_sep ^ name ^ ".csv") result;
-  result
+  Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") new_table;
+  new_table
 
-let rec alter_drop_in_place tables name col col_type before =
+let rec alter_drop_in_place
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (col_type : data_type)
+    (before : (string * Csv.t) list) : (string * Csv.t) list =
   match tables with
   | [] -> raise NoTable
-  | (n, d) :: t when n = name ->
-      before @ [ (n, alter_table_drop_helper d name col col_type) ] @ t
-  | h :: t -> alter_drop_in_place t name col col_type (before @ [ h ])
+  | (n, d) :: t when n = table_name ->
+      before
+      @ [ (n, alter_table_drop_helper d table_name col_name col_type) ]
+      @ t
+  | h :: t ->
+      alter_drop_in_place t table_name col_name col_type (before @ [ h ])
 
 let alter_table_drop
     tables
-    (name : string)
-    (col : string)
-    (col_type : data_type) =
-  alter_drop_in_place tables name col col_type []
+    (table_name : string)
+    (col_name : string)
+    (col_type : data_type) : (string * Csv.t) list =
+  alter_drop_in_place tables table_name col_name col_type []
 
-let alter_table_modify tables name col col_type =
-  raise (Stdlib.Failure "Unimplemented: Table.alter_table_modify")
+let alter_table_modify
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (col_type : data_type) : (string * Csv.t) list =
+  let new_table =
+    let table =
+      Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+    in
+    match table with
+    | [] -> raise Malformed
+    | h :: t ->
+        let rec replace_col cols =
+          match cols with
+          | [] -> []
+          | h' :: t' ->
+              let type_name =
+                match col_type with
+                | INT -> "int"
+                | BOOL -> "bool"
+                | FLOAT -> "float"
+                | STRING -> "string"
+                | CHAR -> "char"
+                | UNSUPPORTED s -> raise Malformed
+              in
+              if h' = col_name then type_name :: replace_col t'
+              else h' :: replace_col t'
+        in
+        replace_col h :: t
+  in
+  (table_name, new_table)
+  :: List.filter (fun x -> fst x <> table_name) tables
 
-let rec match_col_vals cols vals =
-  match vals with
+let rec get_row_indices
+    (col : string list)
+    (op : operator)
+    (value : string)
+    (index : int) : int list =
+  match col with
   | [] -> []
-  | h :: val_t -> (
-      match cols with
-      | [] -> []
-      | (name, dt) :: col_t ->
-          (name, dt, h) :: match_col_vals col_t val_t)
+  | h :: t ->
+      if
+        (op = LESS && h < value)
+        || (op = LE && h <= value)
+        || (op = GREATER && h > value)
+        || (op = GE && h >= value)
+        || (op = EQ && h = value)
+      then index :: get_row_indices t op value (index + 1)
+      else get_row_indices t op value (index + 1)
 
-let rec check_valid lst =
-  match lst with
-  | [] -> ()
-  | (name, dt, h) :: t -> (
-      match dt with
-      | BOOL -> (
-          match bool_of_string_opt h with
-          | Some _ -> check_valid t
-          | None -> invalid_arg "not a bool")
-      | INT -> (
-          match int_of_string_opt h with
-          | Some _ -> check_valid t
-          | None -> invalid_arg "not an int")
-      | FLOAT -> (
-          match float_of_string_opt h with
-          | Some _ -> check_valid t
-          | None -> invalid_arg "not a float")
-      | STRING -> check_valid t
-      | CHAR ->
-          if String.length h = 1 then check_valid t
-          else invalid_arg "not a char"
-      | UNSUPPORTED s -> invalid_arg "unsupported")
+let rec where_find_col
+    (transposed : Csv.t)
+    (col_name : string)
+    (op : operator)
+    (value : string) : int list =
+  match transposed with
+  | [] -> []
+  | h :: t ->
+      if List.nth h 0 = col_name then get_row_indices h op value 0
+      else where_find_col t col_name op value
 
-let insert
-    (fname : string)
-    (cols : (string * Command.data_type) list)
-    (vals : string list) =
-  if List.length cols = List.length vals then
-    try
-      check_valid (match_col_vals cols vals);
-      let table = load_table fname @ [ vals ] in
-      Csv.save ("data" ^ Filename.dir_sep ^ fname ^ ".csv") table;
-      table
-    with
-    | Invalid_argument s ->
-        raise (Stdlib.Failure "Columns do not match values")
-    | Stdlib.Failure s ->
-        raise (Stdlib.Failure "Columns do not match values")
-    | Malformed -> raise (Stdlib.Failure "Columns do not match values")
-  else raise (Stdlib.Failure "Columns do not match values")
+let get_list_tail = function
+  | [] -> []
+  | h :: t -> t
 
-(* let get_first_el lis = match lis with | [] -> [] | h :: t -> h
+let rec delete_table_helper
+    (table : Csv.t)
+    (indices : int list)
+    (counter : int) : Csv.t =
+  match table with
+  | [] -> []
+  | h :: t ->
+      if List.length indices = 0 then table
+      else if List.nth indices 0 = counter then
+        delete_table_helper t (get_list_tail indices) (counter + 1)
+      else h :: delete_table_helper t indices (counter + 1)
 
-   let remove_one_el lis = match lis with | [] -> [] | h :: t -> t
+(* DELETE TABLE *)
+let delete_table
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : operator)
+    (value : string) : (string * Csv.t) list =
+  let table =
+    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+  in
+  let delete_rows =
+    where_find_col (transpose_table table 0) col_name op value
+  in
+  Csv.save
+    ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+    (delete_table_helper table delete_rows 0);
+  (table_name, delete_table_helper table delete_rows 0)
+  :: List.filter (fun x -> fst x <> table_name) tables
 
-   let rec update_helper acc col vals cond = match vals with | [] -> acc
-   | h :: t -> if cond h then update_helper (h @ acc) (remove_one_el
-   col) t cond else update_helper (get_first_el col @ acc)
-   (remove_one_el vals) t cond
+(* SELECT FROM WHERE *)
 
-   let rec new_table acc (temp : 'a list) (col : 'a list) t = match t
-   with | [] -> [] | h :: t -> if h = col then new_table (acc @ [ temp
-   ]) temp col t else new_table (acc @ [ h ]) temp col t
+let rec select_where_helper
+    (table : Csv.t)
+    (indices : int list)
+    (counter : int) : Csv.t =
+  match table with
+  | [] -> []
+  | h :: t ->
+      if counter = 0 then
+        h :: select_where_helper t indices (counter + 1)
+      else if List.length indices = 0 then []
+      else if List.nth indices 0 = counter then
+        h :: select_where_helper t (get_list_tail indices) (counter + 1)
+      else select_where_helper t indices (counter + 1)
 
-   let update t (col : 'a list) vals cond = let temp = update_helper []
-   col vals cond in new_table [] temp col t *)
+let select_where_table
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : operator)
+    (value : string) : Csv.t =
+  let table =
+    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+  in
+  let select_rows =
+    where_find_col (transpose_table table 0) col_name op value
+  in
+  select_where_helper table select_rows 0
+
+(* UPDATE TABLE *)
+
+let rec update_helper
+    (table : Csv.t)
+    (cols : string list)
+    (vals : string list)
+    (indices : int list)
+    (counter : int) : Csv.t =
+  match table with
+  | [] -> []
+  | h :: t ->
+      if counter = 0 then
+        h :: update_helper t cols vals indices (counter + 1)
+      else if List.length indices = 0 then table
+      else if List.nth indices 0 = counter then
+        vals
+        :: update_helper t cols vals (get_list_tail indices)
+             (counter + 1)
+      else h :: update_helper t cols vals indices (counter + 1)
+
+let update_table
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (cols : string list)
+    (vals : string list)
+    (col_name : string)
+    (op : operator)
+    (value : string) : Csv.t =
+  let table =
+    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+  in
+  let update_rows =
+    where_find_col (transpose_table table 0) col_name op value
+  in
+  Csv.save
+    ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
+    (update_helper table cols vals update_rows 0);
+  update_helper table cols vals update_rows 0
+
+let aggregate_int_columns
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : aggregate_int) : int =
+  let table = List.find (fun x -> fst x = table_name) tables |> snd in
+  let transposed = transpose_table table 0 in
+  let filtered =
+    List.filter (fun x -> List.nth x 0 = col_name) transposed
+    |> List.flatten
+  in
+  let mapped =
+    match filtered with
+    | [] -> failwith "Something is wrong with your table."
+    | h :: t -> List.map (fun x -> int_of_string x) t
+  in
+  match op with
+  | AVERAGE -> List.fold_left ( + ) 0 mapped / List.length mapped
+  | MEDIAN ->
+      if List.length mapped mod 2 = 0 then
+        List.nth
+          (List.sort (fun x y -> x - y) mapped)
+          (List.length mapped / 2)
+      else
+        List.nth
+          (List.sort (fun x y -> x - y) mapped)
+          (List.length mapped / 2)
+        + List.nth
+            (List.sort (fun x y -> x - y) mapped)
+            ((List.length mapped / 2) + 1)
+        |> ( / ) 2
+  | SUM -> List.fold_left ( + ) 0 mapped
+  | PRODUCT -> List.fold_left ( * ) 1 mapped
+  | MIN -> List.nth (List.sort (fun x y -> x - y) mapped) 0
+  | MAX ->
+      List.nth
+        (List.sort (fun x y -> x - y) mapped)
+        (List.length mapped - 1)
+  | COUNT -> List.length mapped
+
+let aggregate_string_columns
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : aggregate_string) : string =
+  let table = List.find (fun x -> fst x = table_name) tables |> snd in
+  let transposed = transpose_table table 0 in
+  let filtered =
+    List.filter (fun x -> List.nth x 0 = col_name) transposed
+    |> List.flatten
+  in
+  let no_head =
+    match filtered with
+    | [] -> failwith "Something is wrong with your table."
+    | h :: t -> t
+  in
+  match op with
+  | CONCAT -> String.concat ", " no_head
+  | CHARACTER_COUNT ->
+      string_of_int
+        (List.fold_left ( + ) 0
+           (List.map (fun x -> String.length x) no_head))
+  | WORD_COUNT -> string_of_int (List.length no_head)
+
+let aggregate_boolean_columns
+    (tables : (string * Csv.t) list)
+    (table_name : string)
+    (col_name : string)
+    (op : aggregate_boolean) : string =
+  let table = List.find (fun x -> fst x = table_name) tables |> snd in
+  let transposed = transpose_table table 0 in
+  let filtered =
+    List.filter (fun x -> List.nth x 0 = col_name) transposed
+    |> List.flatten
+  in
+  let mapped =
+    match filtered with
+    | [] -> failwith "Something is wrong with your table."
+    | h :: t -> List.map (fun x -> bool_of_string x) t
+  in
+  match op with
+  | AND -> string_of_bool (List.fold_left ( && ) true mapped)
+  | OR -> string_of_bool (List.fold_left ( || ) false mapped)
+  | NAND ->
+      string_of_bool
+        (List.fold_left (fun x y -> not (x && y)) true mapped)
+  | NOR ->
+      string_of_bool
+        (List.fold_left (fun x y -> not (x || y)) false mapped)
+  | XOR ->
+      string_of_bool
+        (List.fold_left
+           (fun x y -> (not (x && y)) || (x && y) |> not)
+           true mapped)

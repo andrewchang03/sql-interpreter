@@ -1,0 +1,5 @@
+new:string,id:int,name:string,age:int
+nan,1,michael,15
+nan,5,robert,30
+nan,3,cornell,100
+nan,4,mesut,20
