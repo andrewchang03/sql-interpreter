@@ -54,19 +54,58 @@ let drop_table (tables : (string * Csv.t) list) (table_name : string) :
     (string * Csv.t) list =
   List.filter (fun x -> fst x <> table_name) tables
 
+let rec match_col_vals cols vals =
+  match vals with
+  | [] -> []
+  | h :: val_t -> (
+      match cols with
+      | [] -> []
+      | (name, dt) :: col_t ->
+          (name, dt, h) :: match_col_vals col_t val_t)
+
+let rec check_valid lst =
+  match lst with
+  | [] -> ()
+  | (name, dt, h) :: t -> (
+      match dt with
+      | BOOL -> (
+          match bool_of_string_opt h with
+          | Some _ -> check_valid t
+          | None -> invalid_arg "not a bool")
+      | INT -> (
+          match int_of_string_opt h with
+          | Some i -> check_valid t
+          | None -> invalid_arg "not an int")
+      | FLOAT -> (
+          match float_of_string_opt h with
+          | Some _ -> check_valid t
+          | None -> invalid_arg "not a float")
+      | STRING -> check_valid t
+      | CHAR ->
+          if String.length h = 1 then check_valid t
+          else invalid_arg "not a char"
+      | UNSUPPORTED s -> invalid_arg "unsupported")
+
+let load_table fname =
+  Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
+
 let insert
     (table_name : string)
     (cols : (string * data_type) list)
     (vals : string list) : Csv.t =
-  let table =
-    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-  in
-  (* if List.nth table 0 <> cols then failwith "column names do not
-     match" *)
-  Csv.save
-    ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-    (table @ [ vals ]);
-  table @ [ vals ]
+  if List.length cols = List.length vals then
+    try
+      check_valid (match_col_vals cols vals);
+      let table = load_table table_name @ [ vals ] in
+      Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") table;
+      table
+    with
+    | Invalid_argument s ->
+        raise (Stdlib.Failure "Columns do not match values")
+    | Stdlib.Failure s ->
+        raise (Stdlib.Failure "Columns do not match values")
+    | Malformed -> raise (Stdlib.Failure "Columns do not match values")
+  else raise (Stdlib.Failure "Columns do not match values")
 
 (* ALTER TABLE ADD *)
 let rec add_empty_cols (data : string list list) : string list list =

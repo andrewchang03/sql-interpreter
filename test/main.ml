@@ -450,6 +450,20 @@ let agg_exceptions =
           "agg_sample" "age:int" OR);
   ]
 
+let insert_exceptions =
+  [
+    test_exceptions "insert wrong datatype"
+      (Stdlib.Failure "Columns do not match values") (fun () ->
+        insert "create"
+          [
+            ("first_name", STRING);
+            ("last_name", STRING);
+            ("age", INT);
+            ("grade", STRING);
+          ]
+          [ "jenna"; "parker"; "hello"; "B+" ]);
+  ]
+
 let suite =
   "Test suites"
   >::: List.flatten
@@ -461,6 +475,7 @@ let suite =
            conditional_query_tests;
            aggregate_int_tests;
            agg_exceptions;
+           insert_exceptions;
          ]
 
 let _ = run_test_tt_main suite
