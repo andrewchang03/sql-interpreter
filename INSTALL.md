@@ -13,7 +13,13 @@ via opam:
 - ANSITerminal
 - ounit2
 - csv
+  - download from https://github.com/Chris00/ocaml-csv
+  - follow instructions on github linked on above webpage and do opam install csv
 - unix
+- lablgl 
+  - download from http://wwwfun.kurims.kyoto-u.ac.jp/soft/olabl/lablgl.html
+  - follow instructions on github linked on above webpage and do opam install lablgl 
+
 
 The appropriate command is
   ``opam install [package name]``.

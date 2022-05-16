@@ -1,0 +1,6 @@
+yes/no:bool,student_name:string,character:char,account:float
+true,dog,c,1.1
+false,cat,b,1.2
+false,tiger,d,1.3
+true,zebra,e,1.4
+false,panda,f,1.5

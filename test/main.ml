@@ -330,9 +330,9 @@ let select_insert_tests =
          Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv")
        in
        select table [ "name:string"; "age:int" ]);
-    test "SELECT FROM WHERE"
+    test "SELECT FROM WHERE equal"
       (Csv.load
-         ("data" ^ Filename.dir_sep ^ "select_where_compare" ^ ".csv"))
+         ("data" ^ Filename.dir_sep ^ "select_where_equal" ^ ".csv"))
       (let _ =
          Csv.save
            ("data" ^ Filename.dir_sep ^ "delete_copy" ^ ".csv")
@@ -342,6 +342,30 @@ let select_insert_tests =
          (Csv.load
             ("data" ^ Filename.dir_sep ^ "select_where" ^ ".csv"))
          "name:string" EQ "cornell");
+    test "SELECT FROM WHERE greater than equal"
+      (Csv.load
+         ("data" ^ Filename.dir_sep ^ "select_where_greater" ^ ".csv"))
+      (let _ =
+         Csv.save
+           ("data" ^ Filename.dir_sep ^ "delete_copy" ^ ".csv")
+           (Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv"))
+       in
+       select_where_table
+         (Csv.load
+            ("data" ^ Filename.dir_sep ^ "select_where" ^ ".csv"))
+         "name:string" GE "cornell");
+    test "SELECT FROM WHERE less"
+      (Csv.load
+         ("data" ^ Filename.dir_sep ^ "select_where_less" ^ ".csv"))
+      (let _ =
+         Csv.save
+           ("data" ^ Filename.dir_sep ^ "delete_copy" ^ ".csv")
+           (Csv.load ("data" ^ Filename.dir_sep ^ "delete" ^ ".csv"))
+       in
+       select_where_table
+         (Csv.load
+            ("data" ^ Filename.dir_sep ^ "select_where" ^ ".csv"))
+         "name:string" LESS "michael");
     test "SELECT ALL from a table"
       (Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv"))
       (select_all
@@ -353,7 +377,7 @@ let select_insert_tests =
            ("sample3", []);
          ]
          "sample");
-    test "INSERT INTO one"
+    test "INSERT INTO once"
       (Csv.load ("data" ^ Filename.dir_sep ^ "create_compare" ^ ".csv")
       @ [ [ "jenna"; "parker"; "19"; "B+" ] ])
       (insert "create"
@@ -509,7 +533,7 @@ let agg_exceptions =
 
 let table_exceptions =
   [
-    test_exceptions "insert wrong datatype"
+    test_exceptions "insert wrong datatype int"
       (Stdlib.Failure "Columns do not match values") (fun () ->
         insert "create"
           [
@@ -519,6 +543,36 @@ let table_exceptions =
             ("grade", STRING);
           ]
           [ "jenna"; "parker"; "hello"; "B+" ]);
+    test_exceptions "insert wrong datatype bool"
+      (Stdlib.Failure "Columns do not match values") (fun () ->
+        insert "insert_new2"
+          [
+            ("yes/no", BOOL);
+            ("student_name", STRING);
+            ("character", CHAR);
+            ("account", FLOAT);
+          ]
+          [ "0"; "dog"; "c"; "1.1" ]);
+    test_exceptions "insert wrong datatype char"
+      (Stdlib.Failure "Columns do not match values") (fun () ->
+        insert "insert_new2"
+          [
+            ("yes/no", BOOL);
+            ("student_name", STRING);
+            ("character", CHAR);
+            ("account", FLOAT);
+          ]
+          [ "true"; "dog"; "true"; "1.2" ]);
+    test_exceptions "insert wrong datatype float"
+      (Stdlib.Failure "Columns do not match values") (fun () ->
+        insert "insert_new2"
+          [
+            ("yes/no", BOOL);
+            ("student_name", STRING);
+            ("character", CHAR);
+            ("account", FLOAT);
+          ]
+          [ "true"; "dog"; "a"; "hello" ]);
   ]
 
 let test_multiple =
@@ -541,6 +595,21 @@ let test_multiple =
         [ "4"; "panda"; "2027" ];
       ]
       "insert_new.csv";
+    insert_test "insert_new_test" ""
+      [
+        ("yes/no", BOOL);
+        ("student_name", STRING);
+        ("character", CHAR);
+        ("account", FLOAT);
+      ]
+      [
+        [ "true"; "dog"; "c"; "1.1" ];
+        [ "false"; "cat"; "b"; "1.2" ];
+        [ "false"; "tiger"; "d"; "1.3" ];
+        [ "true"; "zebra"; "e"; "1.4" ];
+        [ "false"; "panda"; "f"; "1.5" ];
+      ]
+      "insert_new2.csv";
   ]
 
 let suite =
