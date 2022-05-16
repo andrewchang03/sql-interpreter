@@ -10,6 +10,7 @@ database.zip
 *.native
 *.byte
 _build/
+_coverage/
 
 # temporary files
 *.swp
