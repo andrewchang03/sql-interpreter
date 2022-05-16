@@ -36,10 +36,10 @@ let help =
 
 let queries_help =
   [
-    "[CREATE TABLE table_name col1 col2 ...]";
+    "[CREATE TABLE table_name col1:data_type col2:data_type ...]";
     "[DROP TABLE table_name] removes table_name";
-    "[SELECT col1 col2 ... FROM table_name] grabs col1 col2 ... from \
-     table_name and returns them";
+    "[SELECT col1:data_type col2:data_type ... FROM table_name] grabs \
+     col1 col2 ... from table_name and returns them";
     "[SELECT FROM table_name WHERE condition]";
     "[SELECT ALL table_name] returns the entire table";
     "[INSERT INTO table_name col1:data_type col2:data_type ... VALUES \
@@ -47,9 +47,9 @@ let queries_help =
      col2 ... with data_type1 data_type2 ...";
     "[ALTER TABLE table_name ADD / DROP / MODIFY column_name datatype]";
     "[DELETE FROM table_name WHERE condition]";
-    "[UPDATE table_name col1 col2 ... VALUES val1 val2 ... WHERE \
-     condition] updates values under col1 and col2 that match \
-     condition with val1 val2 ...";
+    "[UPDATE table_name col1:data_type col2:data_type ... VALUES val1 \
+     val2 ... WHERE condition] updates values under col1 and col2 that \
+     match condition with val1 val2 ...";
     "[AGGREGATE INT / STRING / BOOLEAN FROM table_name col_name \
      aggregate_type] accumulates over a specified column.";
     "condition is the format of column_name operator value, and \
