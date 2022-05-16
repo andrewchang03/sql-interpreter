@@ -11,7 +11,7 @@
     was tested glass box with OUnit. Table module was tested glassbox
     with OUnit to an extent, but it requires us to manually create
     expected csv output files and do other intermediary steps. Interface
-    module was manaully tested. Overall, while it may not be perfect,
+    module was manually tested. Overall, while it may not be perfect,
     this should demonstrate the correctness of our system as it should
     perform the expected operations when queries that satisfy the
     precondition well are provided. *)
@@ -35,6 +35,66 @@ let test_exceptions
     (expected_output : exn)
     (actual_output : unit -> 'a) : test =
   test_name >:: fun _ -> assert_raises expected_output actual_output
+
+let remove_first = function
+  | [] -> []
+  | h :: t -> t
+
+let rec apply_list func name cols = function
+  | [] -> []
+  | h :: t -> func name cols h :: apply_list func name cols t
+
+let copy_file test_name file_name cols =
+  if Sys.file_exists ("data" ^ Filename.dir_sep ^ file_name ^ ".csv")
+  then
+    let _ = create_table test_name cols in
+    let _ =
+      apply_list insert test_name cols
+        (List.rev
+           (remove_first
+              (Csv.load
+                 ("data" ^ Filename.dir_sep ^ file_name ^ ".csv"))))
+    in
+    ()
+  else
+    let _ = create_table test_name cols in
+    ()
+
+let insert_test
+    (name : string)
+    (insert_file : string)
+    cols
+    (vals : string list list)
+    expected_output : test =
+  name >:: fun _ ->
+  let test_name = name ^ "_test" in
+  copy_file test_name insert_file cols;
+  let _ = apply_list insert test_name cols (List.rev vals) in
+  let compare =
+    Csv.compare
+      (Csv.load ("data" ^ Filename.dir_sep ^ test_name ^ ".csv"))
+      (Csv.load ("data" ^ Filename.dir_sep ^ expected_output))
+  in
+  assert_equal compare 0;
+  Sys.remove ("data" ^ Filename.dir_sep ^ name ^ "_test.csv")
+
+let update_test
+    (name : string)
+    (insert_file : string)
+    cols
+    (vals : string list list)
+    expected_output : test =
+  name >:: fun _ ->
+  let test_name = name ^ "_test" in
+  copy_file test_name insert_file cols;
+  let _ = apply_list insert test_name cols (List.rev vals) in
+  let compare =
+    Csv.compare
+      (Csv.load ("data" ^ Filename.dir_sep ^ test_name ^ ".csv"))
+      (Csv.load ("data" ^ Filename.dir_sep ^ expected_output))
+  in
+  assert_equal compare 0;
+  Sys.remove ("data" ^ Filename.dir_sep ^ name ^ "_test.csv")
 
 let parse_tests =
   [
@@ -447,7 +507,7 @@ let agg_exceptions =
           "agg_sample" "age:int" OR);
   ]
 
-let insert_exceptions =
+let table_exceptions =
   [
     test_exceptions "insert wrong datatype"
       (Stdlib.Failure "Columns do not match values") (fun () ->
@@ -461,6 +521,28 @@ let insert_exceptions =
           [ "jenna"; "parker"; "hello"; "B+" ]);
   ]
 
+let test_multiple =
+  [
+    insert_test "insert_students" "insert_existing"
+      [ ("id", INT); ("student_name", STRING); ("grad_year", INT) ]
+      [
+        [ "11"; "dog"; "2025" ];
+        [ "12"; "cat"; "2026" ];
+        [ "20"; "tiger"; "2027" ];
+      ]
+      "insert_compare.csv";
+    insert_test "insert_new_test" ""
+      [ ("id", INT); ("student_name", STRING); ("grad_year", INT) ]
+      [
+        [ "0"; "dog"; "2025" ];
+        [ "1"; "cat"; "2024" ];
+        [ "2"; "tiger"; "2025" ];
+        [ "3"; "zebra"; "2024" ];
+        [ "4"; "panda"; "2027" ];
+      ]
+      "insert_new.csv";
+  ]
+
 let suite =
   "Test suites"
   >::: List.flatten
@@ -472,7 +554,8 @@ let suite =
            conditional_query_tests;
            aggregate_int_tests;
            agg_exceptions;
-           insert_exceptions;
+           table_exceptions;
+           test_multiple;
          ]
 
 let _ = run_test_tt_main suite
