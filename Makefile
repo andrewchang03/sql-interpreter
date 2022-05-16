@@ -13,7 +13,7 @@ run:
 	OCAMLRUNPARAM=b dune exec terminal/main.exe
 
 app:
-	dune exec app/main.exe
+OCAMLRUNPARAM=b dune exec app/main.exe
 
 zip:
 	rm -f database.zip

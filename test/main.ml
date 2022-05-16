@@ -350,10 +350,7 @@ let conditional_query_tests =
            (Csv.load ("data" ^ Filename.dir_sep ^ "sample" ^ ".csv"))
        in
        let _ =
-         update_table
-           (* [ ( "update_copy", Csv.load ("data" ^ Filename.dir_sep ^
-              "sample" ^ ".csv") ); ] *)
-           "update_copy"
+         update_table "update_copy"
            [ "id:int"; "name:string"; "age:int" ]
            [ "10"; "josephine"; "27" ]
            "name:string" EQ "cornell"

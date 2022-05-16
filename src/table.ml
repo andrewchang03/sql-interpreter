@@ -318,13 +318,15 @@ let delete_table
   let table =
     Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
   in
+  let body = remove_first table in
   let delete_rows =
     where_find_col (transpose_table table 0) col_name op value
   in
   Csv.save
     ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-    (delete_table_helper table delete_rows 0);
-  (table_name, delete_table_helper table delete_rows 0)
+    (List.nth table 0 :: delete_table_helper body delete_rows 0);
+  ( table_name,
+    List.nth table 0 :: delete_table_helper body delete_rows 0 )
   :: List.filter (fun x -> fst x <> table_name) tables
 
 (* SELECT FROM WHERE *)
@@ -336,24 +338,13 @@ let rec select_where_helper
   match table with
   | [] -> []
   | h :: t ->
-      (* List.iter (fun h -> print_string (string_of_int h ^ ", "))
-         indices; *)
-      (* print_string (List.nth indices 0 |> string_of_int);
-         print_string (" counter" ^ string_of_int counter); *)
-      (* if counter = -1 then ( print_string " here1 "; h ::
-         select_where_helper t indices (counter + 1)) *)
-      if List.length indices = 0 then (* print_string " here2 "; *)
-        []
-      else if List.nth indices 0 = counter then (
-        print_string ("\n" ^ List.nth h 0 ^ "\n");
-        h :: select_where_helper t (get_list_tail indices) (counter + 1))
-      else
-        (* print_string " here3 "; *)
-        select_where_helper t indices (counter + 1)
+      if List.length indices = 0 then []
+      else if List.nth indices 0 = counter then
+        h :: select_where_helper t (get_list_tail indices) (counter + 1)
+      else select_where_helper t indices (counter + 1)
 
 let select_where_table
-    (* (tables : (string * Csv.t) list) *)
-      (table : Csv.t)
+    (table : Csv.t)
     (col_name : string)
     (op : operator)
     (value : string) : Csv.t =
@@ -393,13 +384,14 @@ let update_table
   let table =
     Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
   in
+  let body = remove_first table in
   let update_rows =
     where_find_col (transpose_table table 0) col_name op value
   in
   Csv.save
     ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-    (update_helper table cols vals update_rows 0);
-  update_helper table cols vals update_rows 0
+    (List.nth table 0 :: update_helper body cols vals update_rows 0);
+  List.nth table 0 :: update_helper body cols vals update_rows 0
 
 let aggregate_int_columns
     (tables : (string * Csv.t) list)

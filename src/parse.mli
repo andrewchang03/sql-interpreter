@@ -1,4 +1,4 @@
-(** Provides variant types and ASTs for queries along with a parser *)
+(** Provides variant types and types for queries along with a parser *)
 
 (** [data_type] provides variant data types that the table supports *)
 type data_type =
@@ -63,7 +63,7 @@ type insert_phrase = {
   cols : (string * data_type) list;
   vals : string list;
 }
-(** [insert_phrase] provides the AST for INSERT INTO queries *)
+(** [insert_phrase] provides the type for INSERT INTO queries *)
 
 type alter_phrase = {
   table_name : string;
@@ -71,18 +71,21 @@ type alter_phrase = {
   col_name : string;
   col_type : data_type;
 }
-(** [alter_phrase] provides the AST for ALTER TABLE queries *)
+(** [alter_phrase] provides the type for ALTER TABLE queries *)
 
 type select_phrase = {
   table_name : string;
   col_names : string list;
 }
-(** [select_phrase] provides the AST for SELECT queries *)
+(** [select_phrase] provides the type for SELECT queries *)
 
 type select_where_phrase = {
   table_name : string;
   cond : condition;
 }
+
+(** [select_where_phrase] provides the data type for SELECT WHERE
+    queries *)
 
 type update_phrase = {
   table_name : string;
@@ -90,26 +93,26 @@ type update_phrase = {
   vals : string list;
   cond : condition;
 }
-(** [update_phrase] provides the AST for UPDATE queries *)
+(** [update_phrase] provides the type for UPDATE queries *)
 
 type delete_phrase = {
   table_name : string;
   cond : condition;
 }
-(** [delete_phrase] provides the AST for DELETE FROM queries *)
+(** [delete_phrase] provides the type for DELETE FROM queries *)
 
 type create_phrase = {
   table_name : string;
   cols : (string * data_type) list;
 }
-(** [create_phrase] provides the AST for CREATE TABLE queries *)
+(** [create_phrase] provides the type for CREATE TABLE queries *)
 
 type aggregate_int_phrase = {
   table_name : string;
   col_name : string;
   agg_type : aggregate_int;
 }
-(** [aggregate_int_phrase] provides the AST for aggregate operations on
+(** [aggregate_int_phrase] provides the type for aggregate operations on
     columns holding integer data *)
 
 type aggregate_string_phrase = {
@@ -117,7 +120,7 @@ type aggregate_string_phrase = {
   col_name : string;
   agg_type : aggregate_string;
 }
-(** [aggregate_string_phrase] provides the AST for aggregate operations
+(** [aggregate_string_phrase] provides the type for aggregate operations
     on columns holding string data *)
 
 type aggregate_bool_phrase = {
@@ -125,8 +128,8 @@ type aggregate_bool_phrase = {
   col_name : string;
   agg_type : aggregate_boolean;
 }
-(** [aggregate_bool_phrase] provides the AST for aggregate operations on
-    columns holding boolean data *)
+(** [aggregate_bool_phrase] provides the type for aggregate operations
+    on columns holding boolean data *)
 
 (** [command] provides a series of command or query variants *)
 type command =

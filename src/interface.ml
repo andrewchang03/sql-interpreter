@@ -138,13 +138,17 @@ let controller state action =
             (Table.select_where_table day_query "id:int" GE "1000")
             "id:int" LESS "3000"
       in
-      (* let name_query = if state.name.y = 500. then
-         Table.select_where_table level_query "name:string" GREATER "Q"
-         else if state.level.y = 550. then Table.select_where_table
-         (Table.select_where_table level_query "name:string" GREATER
-         "G") "name:string" LESS "P" else Table.select_where_table
-         level_query "name:string" LESS "G" in *)
-      state.table <- level_query
+      let name_query =
+        if state.name.y = 500. then
+          Table.select_where_table level_query "name:string" GREATER "Q"
+        else if state.name.y = 550. then
+          Table.select_where_table
+            (Table.select_where_table level_query "name:string" GREATER
+               "G")
+            "name:string" LESS "P"
+        else Table.select_where_table level_query "name:string" LESS "G"
+      in
+      state.table <- name_query
 
 let init () =
   {
