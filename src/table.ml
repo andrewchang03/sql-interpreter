@@ -106,12 +106,8 @@ let insert
       let table = load_table table_name @ [ vals ] in
       Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") table;
       table
-    with
-    | Invalid_argument s ->
-        raise (Stdlib.Failure "Columns do not match values")
-    | Stdlib.Failure s ->
-        raise (Stdlib.Failure "Columns do not match values")
-    | Malformed -> raise (Stdlib.Failure "Columns do not match values")
+    with Invalid_argument s ->
+      raise (Stdlib.Failure "Columns do not match values")
   else raise (Stdlib.Failure "Columns do not match values")
 
 (* ALTER TABLE ADD *)

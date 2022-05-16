@@ -1,4 +1,6 @@
 (library
  (name database)
  (public_name Database)
- (libraries csv unix ANSITerminal lablgl lablgl.glut))
+ (libraries csv unix ANSITerminal lablgl lablgl.glut)
+ (instrumentation
+  (backend bisect_ppx)))

@@ -78,24 +78,6 @@ let insert_test
   assert_equal compare 0;
   Sys.remove ("data" ^ Filename.dir_sep ^ name ^ "_test.csv")
 
-let update_test
-    (name : string)
-    (insert_file : string)
-    cols
-    (vals : string list list)
-    expected_output : test =
-  name >:: fun _ ->
-  let test_name = name ^ "_test" in
-  copy_file test_name insert_file cols;
-  let _ = apply_list insert test_name cols (List.rev vals) in
-  let compare =
-    Csv.compare
-      (Csv.load ("data" ^ Filename.dir_sep ^ test_name ^ ".csv"))
-      (Csv.load ("data" ^ Filename.dir_sep ^ expected_output))
-  in
-  assert_equal compare 0;
-  Sys.remove ("data" ^ Filename.dir_sep ^ name ^ "_test.csv")
-
 let parse_tests =
   [
     test "parse Help" Help (parse "help");
@@ -270,6 +252,8 @@ let parse_exceptions =
             ("age", INT);
             ("grade", UNSUPPORTED "");
           ]);
+    test_exceptions "parse CREATE TABLE empty" Malformed (fun () ->
+        parse "CREATE TABLE empty");
     test_exceptions "ALTER TABLE wrong data type" Malformed (fun () ->
         alter_table_add
           [

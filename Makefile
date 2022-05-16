@@ -13,7 +13,7 @@ run:
 	OCAMLRUNPARAM=b dune exec terminal/main.exe
 
 app:
-OCAMLRUNPARAM=b dune exec app/main.exe
+	OCAMLRUNPARAM=b dune exec app/main.exe
 
 zip:
 	rm -f database.zip
@@ -29,3 +29,10 @@ docs:
 linecount:
 	ocamlbuild -clean
 	cloc --by-file --include-lang=OCaml .
+
+bisect: bisect-clean
+	-dune exec --instrument-with bisect_ppx --force test/main.exe
+	bisect-ppx-report html
+
+bisect-clean:
+	rm -rf _coverage bisect*.coverage
