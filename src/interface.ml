@@ -80,9 +80,7 @@ let rec render_rows pos y color rows =
 
 let render_table color rows =
   match List.nth_opt rows 0 with
-  | Some col ->
-      let num_rows = List.length rows |> float_of_int in
-      render_rows 1. 400. color rows
+  | Some col -> render_rows 1. 400. color rows
   | None -> ()
 
 let controller state action =

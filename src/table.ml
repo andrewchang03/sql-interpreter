@@ -10,6 +10,7 @@ let rec transpose_table (table : Csv.t) (n : int) : Csv.t =
     List.map (fun x -> List.nth x n) table
     :: transpose_table table (n + 1)
 
+(* SELECT *)
 let rec select (table : Csv.t) (col_names : string list) : Csv.t =
   transpose_table
     (List.filter
@@ -17,8 +18,7 @@ let rec select (table : Csv.t) (col_names : string list) : Csv.t =
        (transpose_table table 0))
     0
 
-(** [select_all tables name] finds table [name] in collection of tables
-    [tables] and returns it. *)
+(* SELECT ALL *)
 let select_all (tables : (string * Csv.t) list) (name : string) =
   List.find (fun x -> fst x = name) tables |> snd
 
@@ -54,6 +54,8 @@ let drop_table (tables : (string * Csv.t) list) (table_name : string) :
     (string * Csv.t) list =
   List.filter (fun x -> fst x <> table_name) tables
 
+(* [match_col_vals cols vals] is a tuple that matches columns and
+   datatypes to values in list *)
 let rec match_col_vals cols vals =
   match vals with
   | [] -> []
@@ -63,6 +65,8 @@ let rec match_col_vals cols vals =
       | (name, dt) :: col_t ->
           (name, dt, h) :: match_col_vals col_t val_t)
 
+(* [check_valid lst] is lst if the list values match the datatype of the
+   column and raises an invalid_arg if it does not *)
 let rec check_valid lst =
   match lst with
   | [] -> ()
@@ -86,9 +90,12 @@ let rec check_valid lst =
           else invalid_arg "not a char"
       | UNSUPPORTED s -> invalid_arg "unsupported")
 
+(*[load_table fname] loads the csv table from file [fname] in the data
+  folder *)
 let load_table fname =
   Csv.load ("data" ^ Filename.dir_sep ^ fname ^ ".csv")
 
+(*INSERT*)
 let insert
     (table_name : string)
     (cols : (string * data_type) list)
@@ -229,9 +236,7 @@ let alter_table_modify
     (col_name : string)
     (col_type : data_type) : (string * Csv.t) list =
   let new_table =
-    let table =
-      Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-    in
+    let table = load_table table_name in
     match table with
     | [] -> raise Malformed
     | h :: t ->
@@ -270,9 +275,7 @@ let rec get_row_indices
         || (op = GREATER && h > value)
         || (op = GE && h >= value)
         || (op = EQ && h = value)
-      then
-        (* print_string "here"; *)
-        index :: get_row_indices t op value (index + 1)
+      then index :: get_row_indices t op value (index + 1)
       else get_row_indices t op value (index + 1)
 
 let remove_first (table : 'a list) : 'a list =
@@ -315,9 +318,7 @@ let delete_table
     (col_name : string)
     (op : operator)
     (value : string) : (string * Csv.t) list =
-  let table =
-    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-  in
+  let table = load_table table_name in
   let body = remove_first table in
   let delete_rows =
     where_find_col (transpose_table table 0) col_name op value
@@ -330,7 +331,6 @@ let delete_table
   :: List.filter (fun x -> fst x <> table_name) tables
 
 (* SELECT FROM WHERE *)
-
 let rec select_where_helper
     (table : Csv.t)
     (indices : int list)
@@ -381,9 +381,7 @@ let update_table
     (col_name : string)
     (op : operator)
     (value : string) : Csv.t =
-  let table =
-    Csv.load ("data" ^ Filename.dir_sep ^ table_name ^ ".csv")
-  in
+  let table = load_table table_name in
   let body = remove_first table in
   let update_rows =
     where_find_col (transpose_table table 0) col_name op value
