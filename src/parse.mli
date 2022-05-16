@@ -1,6 +1,5 @@
 (** Provides variant types and types for queries along with a parser *)
 
-(** [data_type] provides variant data types that the table supports *)
 type data_type =
   | INT
   | FLOAT
@@ -8,16 +7,16 @@ type data_type =
   | STRING
   | CHAR
   | UNSUPPORTED of string
+      (** [data_type] provides variant data types that the table
+          supports *)
 
-(** [alter_type] provides a list of variant alter operations *)
 type alter_type =
   | ADD
   | DROP
   | MODIFY
   | UNSUPPORTED of string
+      (** [alter_type] provides a list of variant alter operations *)
 
-(** [operator] provides variant types for operators to be used in
-    conditions *)
 type operator =
   | LESS
   | GREATER
@@ -25,8 +24,9 @@ type operator =
   | LE
   | GE
   | UNSUPPORTED of string
+      (** [operator] provides variant types for operators to be used in
+          conditions *)
 
-(** [aggregate_int] provides variant operations for integer columns *)
 type aggregate_int =
   | AVERAGE
   | MEDIAN
@@ -35,21 +35,24 @@ type aggregate_int =
   | MIN
   | MAX
   | COUNT
+      (** [aggregate_int] provides variant operations for integer
+          columns *)
 
-(** [aggregate_string] provides the variant operations for string
-    columns *)
 type aggregate_string =
   | CONCAT
   | CHARACTER_COUNT
   | WORD_COUNT
+      (** [aggregate_string] provides the variant operations for string
+          columns *)
 
-(** [aggregate_boolean] provides the variant operations for bool columns *)
 type aggregate_boolean =
   | AND
   | NAND
   | OR
   | NOR
   | XOR
+      (** [aggregate_boolean] provides the variant operations for bool
+          columns *)
 
 type condition = {
   left : string;
@@ -83,7 +86,6 @@ type select_where_phrase = {
   table_name : string;
   cond : condition;
 }
-
 (** [select_where_phrase] provides the data type for SELECT WHERE
     queries *)
 
@@ -131,7 +133,6 @@ type aggregate_bool_phrase = {
 (** [aggregate_bool_phrase] provides the type for aggregate operations
     on columns holding boolean data *)
 
-(** [command] provides a series of command or query variants *)
 type command =
   | CreateTable of create_phrase
   | DropTable of string
@@ -151,6 +152,7 @@ type command =
   | Help
   | QueriesHelp
   | Quit
+      (** [command] provides a series of command or query variants *)
 
 exception Empty
 (** [raise Empty] when table is empty *)

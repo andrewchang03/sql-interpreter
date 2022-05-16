@@ -151,27 +151,16 @@ let alter_table_add_helper
   Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") new_table;
   new_table
 
-let rec alter_add_in_place
+let rec alter_table_add
     (tables : (string * Csv.t) list)
     (table_name : string)
     (col_name : string)
-    (col_type : data_type)
-    (before : (string * Csv.t) list) : (string * Csv.t) list =
+    (col_type : data_type) : (string * Csv.t) list =
   match tables with
   | [] -> raise NoTable
   | (n, d) :: t when n = table_name ->
-      before
-      @ [ (n, alter_table_add_helper d table_name col_name col_type) ]
-      @ t
-  | h :: t ->
-      alter_add_in_place t table_name col_name col_type (before @ [ h ])
-
-let alter_table_add
-    (tables : (string * Csv.t) list)
-    (name : string)
-    (col : string)
-    (col_type : data_type) : (string * Csv.t) list =
-  alter_add_in_place tables name col col_type []
+      (n, alter_table_add_helper d table_name col_name col_type) :: t
+  | h :: t -> h :: alter_table_add t table_name col_name col_type
 
 (* ALTER TABLE DROP *)
 let rec drop_cols (data : string list list) cols drop_col :
@@ -207,59 +196,51 @@ let alter_table_drop_helper
   Csv.save ("data" ^ Filename.dir_sep ^ table_name ^ ".csv") new_table;
   new_table
 
-let rec alter_drop_in_place
-    (tables : (string * Csv.t) list)
-    (table_name : string)
-    (col_name : string)
-    (col_type : data_type)
-    (before : (string * Csv.t) list) : (string * Csv.t) list =
-  match tables with
-  | [] -> raise NoTable
-  | (n, d) :: t when n = table_name ->
-      before
-      @ [ (n, alter_table_drop_helper d table_name col_name col_type) ]
-      @ t
-  | h :: t ->
-      alter_drop_in_place t table_name col_name col_type (before @ [ h ])
-
-let alter_table_drop
+let rec alter_table_drop
     tables
     (table_name : string)
     (col_name : string)
     (col_type : data_type) : (string * Csv.t) list =
-  alter_drop_in_place tables table_name col_name col_type []
+  match tables with
+  | [] -> raise NoTable
+  | (n, d) :: t when n = table_name ->
+      (n, alter_table_drop_helper d table_name col_name col_type) :: t
+  | h :: t -> h :: alter_table_drop t table_name col_name col_type
 
 (* ALTER TABLE MODIFY *)
-let alter_table_modify
+let rec replace_col cols col_name col_type =
+  match cols with
+  | [] -> []
+  | h' :: t' ->
+      let c = List.nth (String.split_on_char ':' h') 0 in
+      if c = col_name then
+        let type_name =
+          match col_type with
+          | INT -> "int"
+          | BOOL -> "bool"
+          | FLOAT -> "float"
+          | STRING -> "string"
+          | CHAR -> "char"
+          | UNSUPPORTED s -> raise Malformed
+        in
+        (c ^ ":" ^ type_name) :: t'
+      else h' :: replace_col t' col_name col_type
+
+let rec alter_table_modify
     (tables : (string * Csv.t) list)
     (table_name : string)
     (col_name : string)
     (col_type : data_type) : (string * Csv.t) list =
-  let new_table =
-    let table = load_table table_name in
-    match table with
-    | [] -> raise Malformed
-    | h :: t ->
-        let rec replace_col cols =
-          match cols with
-          | [] -> []
-          | h' :: t' ->
-              let type_name =
-                match col_type with
-                | INT -> "int"
-                | BOOL -> "bool"
-                | FLOAT -> "float"
-                | STRING -> "string"
-                | CHAR -> "char"
-                | UNSUPPORTED s -> raise Malformed
-              in
-              if h' = col_name then type_name :: replace_col t'
-              else h' :: replace_col t'
-        in
-        replace_col h :: t
-  in
-  (table_name, new_table)
-  :: List.filter (fun x -> fst x <> table_name) tables
+  match tables with
+  | [] -> raise NoTable
+  | (n, d) :: t when n = table_name ->
+      let new_table =
+        match d with
+        | [] -> raise Malformed
+        | h :: t -> replace_col h col_name col_type :: t
+      in
+      (n, new_table) :: t
+  | h :: t -> h :: alter_table_modify t table_name col_name col_type
 
 let rec get_row_indices
     (col : string list)
