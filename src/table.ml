@@ -12,11 +12,13 @@ let rec transpose_table (table : Csv.t) (n : int) : Csv.t =
 
 (* SELECT *)
 let rec select (table : Csv.t) (col_names : string list) : Csv.t =
-  transpose_table
-    (List.filter
-       (fun x -> List.mem (List.nth x 0) col_names)
-       (transpose_table table 0))
-    0
+  if List.length table = 0 then raise NoTable
+  else
+    transpose_table
+      (List.filter
+         (fun x -> List.mem (List.nth x 0) col_names)
+         (transpose_table table 0))
+      0
 
 (* SELECT ALL *)
 let select_all (tables : (string * Csv.t) list) (name : string) =
@@ -382,8 +384,14 @@ let aggregate_int_columns
   let mapped =
     match filtered with
     | [] -> failwith "Something is wrong with your table."
-    | h :: t -> List.map (fun x -> int_of_string x) t
+    | h :: t ->
+        List.map
+          (fun x ->
+            try int_of_string x
+            with Stdlib.Failure _ -> raise Malformed)
+          t
   in
+
   match op with
   | AVERAGE -> List.fold_left ( + ) 0 mapped / List.length mapped
   | MEDIAN ->
@@ -416,7 +424,11 @@ let aggregate_string_columns
   let table = List.find (fun x -> fst x = table_name) tables |> snd in
   let transposed = transpose_table table 0 in
   let filtered =
-    List.filter (fun x -> List.nth x 0 = col_name) transposed
+    List.filter
+      (fun x ->
+        try List.nth x 0 = col_name
+        with Stdlib.Failure _ -> raise Malformed)
+      transposed
     |> List.flatten
   in
   let no_head =
@@ -446,7 +458,12 @@ let aggregate_boolean_columns
   let mapped =
     match filtered with
     | [] -> failwith "Something is wrong with your table."
-    | h :: t -> List.map (fun x -> bool_of_string x) t
+    | h :: t ->
+        List.map
+          (fun x ->
+            try bool_of_string x
+            with Invalid_argument _ -> raise Malformed)
+          t
   in
   match op with
   | AND -> string_of_bool (List.fold_left ( && ) true mapped)

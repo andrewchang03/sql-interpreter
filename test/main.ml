@@ -237,7 +237,7 @@ let parse_exceptions =
     test_exceptions "ALTER TABLE no operation specification ADD"
       Malformed (fun () -> parse "ALTER TABLE table_name age int");
     test_exceptions "SELECT from empty table, returns failure"
-      (Stdlib.Failure "nth") (fun () -> select [] []);
+      Database.Parse.NoTable (fun () -> select [] []);
     test_exceptions "AGGREGATE STRING FROM" Malformed (fun () ->
         parse "AGGREGATE STRING FROM sample age:int average");
     test_exceptions "AGGREGATE FORGOT FROM" Malformed (fun () ->
@@ -494,22 +494,22 @@ let aggregate_int_tests =
 let agg_exceptions =
   [
     test_exceptions "AGGREGATE INT SUM wrong data type as string"
-      (Stdlib.Failure "int_of_string") (fun () ->
+      Database.Parse.Malformed (fun () ->
         aggregate_int_columns
           [ ("sample", sample) ]
           "sample" "name:string" SUM);
     test_exceptions "AGGREGATE INT PRODUCT wrong data type as bool"
-      (Stdlib.Failure "int_of_string") (fun () ->
+      Database.Parse.Malformed (fun () ->
         aggregate_int_columns
           [ ("agg_sample", agg_sample) ]
           "agg_sample" "deans:bool" PRODUCT);
     test_exceptions "AGGREGATE BOOLEAN AND wrong data type as string"
-      (Stdlib.Invalid_argument "bool_of_string") (fun () ->
+      Database.Parse.Malformed (fun () ->
         aggregate_boolean_columns
           [ ("agg_sample", agg_sample) ]
           "agg_sample" "name:string" AND);
     test_exceptions "AGGREGATE BOOLEAN OR wrong data type as int"
-      (Stdlib.Invalid_argument "bool_of_string") (fun () ->
+      Database.Parse.Malformed (fun () ->
         aggregate_boolean_columns
           [ ("agg_sample", agg_sample) ]
           "agg_sample" "age:int" OR);

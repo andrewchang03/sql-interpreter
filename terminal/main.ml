@@ -142,17 +142,26 @@ let rec loop_repl (tables : (string * Csv.t) list) :
     end
   | Select s ->
       (* fully functional *)
-      print_readable
-        (add_table_space
-           (select
-              (snd (List.find (fun x -> fst x = s.table_name) tables))
-              s.col_names));
+      (try
+         print_readable
+           (add_table_space
+              (select
+                 (snd
+                    (List.find (fun x -> fst x = s.table_name) tables))
+                 s.col_names))
+       with Not_found ->
+         print_string "Table not found. Please try again.";
+         print_newline ());
       loop_repl tables
   | SelectWhere s ->
-      print_readable
-        (select_where_table
-           (snd (List.find (fun x -> fst x = s.table_name) tables))
-           s.cond.left s.cond.op s.cond.right);
+      (try
+         print_readable
+           (select_where_table
+              (snd (List.find (fun x -> fst x = s.table_name) tables))
+              s.cond.left s.cond.op s.cond.right)
+       with Not_found ->
+         print_string "Table not found. Please try again.";
+         print_newline ());
       loop_repl tables
   | SelectAll s -> begin
       (* fully functional *)
@@ -219,21 +228,46 @@ let rec loop_repl (tables : (string * Csv.t) list) :
       with Malformed -> loop_repl tables
     end
   | AggInt a ->
-      print_int
-        (aggregate_int_columns tables a.table_name a.col_name a.agg_type);
-      print_newline ();
+      (try
+         print_int
+           (aggregate_int_columns tables a.table_name a.col_name
+              a.agg_type);
+         print_newline ()
+       with
+      | Malformed ->
+          print_string "Malformed command. Please try again.";
+          print_newline ()
+      | Not_found ->
+          print_string "Malformed command. Please try again.";
+          print_newline ());
       loop_repl tables
   | AggString a ->
-      print_string
-        (aggregate_string_columns tables a.table_name a.col_name
-           a.agg_type);
-      print_newline ();
+      (try
+         print_string
+           (aggregate_string_columns tables a.table_name a.col_name
+              a.agg_type);
+         print_newline ()
+       with
+      | Malformed ->
+          print_string "Malformed command. Please try again.";
+          print_newline ()
+      | Not_found ->
+          print_string "Malformed command. Please try again.";
+          print_newline ());
       loop_repl tables
   | AggBool a ->
-      print_string
-        (aggregate_boolean_columns tables a.table_name a.col_name
-           a.agg_type);
-      print_newline ();
+      (try
+         print_string
+           (aggregate_boolean_columns tables a.table_name a.col_name
+              a.agg_type);
+         print_newline ()
+       with
+      | Malformed ->
+          print_string "Malformed command. Please try again.";
+          print_newline ()
+      | Not_found ->
+          print_string "Malformed command. Please try again.";
+          print_newline ());
       loop_repl tables
   | exception NoTable ->
       print_string
