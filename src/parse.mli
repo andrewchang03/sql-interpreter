@@ -148,6 +148,7 @@ type command =
   | AggBool of aggregate_bool_phrase
   | LoadTable of string
   | DisplayTable of string
+  | CopyFile of string
   | ListTables
   | Help
   | QueriesHelp

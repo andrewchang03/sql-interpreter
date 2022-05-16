@@ -105,6 +105,11 @@ let rec loop_repl (tables : (string * Csv.t) list) :
         Sys.remove ("data/" ^ name ^ ".csv")
       else print_string "table not found.\n";
       loop_repl (drop_table tables name)
+  | CopyFile name ->
+      Csv.save
+        ("data" ^ Filename.dir_sep ^ name ^ "_dup" ^ ".csv")
+        (Csv.load ("data" ^ Filename.dir_sep ^ name ^ ".csv"));
+      loop_repl tables
   | ListTables ->
       (* fully functional *)
       List.iter (fun x -> print_string (fst x ^ "\n")) tables;

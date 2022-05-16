@@ -135,6 +135,7 @@ type command =
   | AggBool of aggregate_bool_phrase
   | LoadTable of string
   | DisplayTable of string
+  | CopyFile of string
   | ListTables
   | Help
   | QueriesHelp
@@ -372,6 +373,7 @@ let parse (str : string) : command =
   with
   | [ "load"; table_name ] -> LoadTable table_name
   | [ "display"; table_name ] -> DisplayTable table_name
+  | [ "copy"; file_name ] -> CopyFile file_name
   | [ "list" ] -> ListTables
   | [ "queries"; "help" ] -> QueriesHelp
   | [ "help" ] -> Help
