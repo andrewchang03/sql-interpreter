@@ -270,8 +270,15 @@ let rec get_row_indices
         || (op = GREATER && h > value)
         || (op = GE && h >= value)
         || (op = EQ && h = value)
-      then index :: get_row_indices t op value (index + 1)
+      then
+        (* print_string "here"; *)
+        index :: get_row_indices t op value (index + 1)
       else get_row_indices t op value (index + 1)
+
+let remove_first (table : 'a list) : 'a list =
+  match table with
+  | h :: t -> t
+  | [] -> []
 
 let rec where_find_col
     (transposed : Csv.t)
@@ -281,7 +288,8 @@ let rec where_find_col
   match transposed with
   | [] -> []
   | h :: t ->
-      if List.nth h 0 = col_name then get_row_indices h op value 0
+      if List.nth h 0 = col_name then
+        get_row_indices (remove_first h) op value 0
       else where_find_col t col_name op value
 
 let get_list_tail = function
@@ -328,12 +336,20 @@ let rec select_where_helper
   match table with
   | [] -> []
   | h :: t ->
-      if counter = 0 then
-        h :: select_where_helper t indices (counter + 1)
-      else if List.length indices = 0 then []
-      else if List.nth indices 0 = counter then
-        h :: select_where_helper t (get_list_tail indices) (counter + 1)
-      else select_where_helper t indices (counter + 1)
+      (* List.iter (fun h -> print_string (string_of_int h ^ ", "))
+         indices; *)
+      (* print_string (List.nth indices 0 |> string_of_int);
+         print_string (" counter" ^ string_of_int counter); *)
+      (* if counter = -1 then ( print_string " here1 "; h ::
+         select_where_helper t indices (counter + 1)) *)
+      if List.length indices = 0 then (* print_string " here2 "; *)
+        []
+      else if List.nth indices 0 = counter then (
+        print_string ("\n" ^ List.nth h 0 ^ "\n");
+        h :: select_where_helper t (get_list_tail indices) (counter + 1))
+      else
+        (* print_string " here3 "; *)
+        select_where_helper t indices (counter + 1)
 
 let select_where_table
     (* (tables : (string * Csv.t) list) *)
@@ -341,10 +357,11 @@ let select_where_table
     (col_name : string)
     (op : operator)
     (value : string) : Csv.t =
+  let body = remove_first table in
   let select_rows =
     where_find_col (transpose_table table 0) col_name op value
   in
-  select_where_helper table select_rows 0
+  List.nth table 0 :: select_where_helper body select_rows 0
 
 (* UPDATE TABLE *)
 

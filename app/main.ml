@@ -49,7 +49,7 @@ let initEngine ~state ~w ~h =
 let () =
   ignore @@ Glut.init Sys.argv;
   let state = ref (Interface.init ()) in
-  let run = initEngine ~state ~w:750 ~h:600 in
+  let run = initEngine ~state ~w:750 ~h:800 in
   run ()
 
 (* LablGL graphics window initialization code credit to:
