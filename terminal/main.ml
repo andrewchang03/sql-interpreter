@@ -36,7 +36,7 @@ let help =
 
 let queries_help =
   [
-    "[CREATE TABLE table_name col1:data_type col2:data_type ...]";
+    "[CREATE TABLE table_name col1 data_type col2 data_type ...]";
     "[DROP TABLE table_name] removes table_name";
     "[SELECT col1:data_type col2:data_type ... FROM table_name] grabs \
      col1 col2 ... from table_name and returns them";

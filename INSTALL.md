@@ -16,10 +16,11 @@ via opam:
   - download from https://github.com/Chris00/ocaml-csv
   - follow instructions on github linked on above webpage and do opam install csv
 - unix
-- lablgl 
+- lablgl
   - download from http://wwwfun.kurims.kyoto-u.ac.jp/soft/olabl/lablgl.html
-  - follow instructions on github linked on above webpage and do opam install lablgl 
-
+  - follow instructions on github linked on above webpage and do opam install lablgl
+  - if you have trouble installing this, just skip and test program with CLI
+  - if skipping, delete interface.ml and interface.mli to have ``make run`` be able to run
 
 The appropriate command is
   ``opam install [package name]``.
